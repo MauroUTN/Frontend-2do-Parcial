@@ -1,4 +1,4 @@
-export const listOrders = async () => {
+export const listOrders = async (searchTerm="", status="all", pageNumber=1, pageSize=20) => {
   const response = await fetch('/api/orders', {
     method: 'GET',
     headers: {

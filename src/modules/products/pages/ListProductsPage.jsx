@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-import { getProducts } from '../services/list';
+import {getProducts } from '../services/list';
 
 const productStatus = {
   ALL: 'all',
@@ -43,9 +43,14 @@ function ListProductsPage() {
     fetchProducts();
   }, [status, pageSize, pageNumber]);
 
+  useEffect(() => {
+    setPageNumber(1);
+  }, [status]);
+
   const totalPages = Math.ceil(total / pageSize);
 
   const handleSearch = async () => {
+    setPageNumber(1);
     await fetchProducts();
   };
 

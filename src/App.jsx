@@ -8,6 +8,7 @@ import Home from './modules/home/pages/Home';
 import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 
+
 function App() {
   const router = createBrowserRouter([
     {
@@ -30,11 +31,9 @@ function App() {
     },
     {
       path: '/admin',
-      element: (
-        <ProtectedRoute>
-          <Dashboard />
-        </ProtectedRoute>
-      ),
+      element:/*  <ProtectedRoute> */
+          <Dashboard />,
+      /* </ProtectedRoute>, */
       children: [
         {
           path: '/admin/home',
