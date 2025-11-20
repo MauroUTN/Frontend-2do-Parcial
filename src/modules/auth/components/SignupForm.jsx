@@ -1,113 +1,141 @@
-// src/modules/auth/components/SignupForm.jsx
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Input from '../../shared/components/Input';
-import Button from '../../shared/components/Button';
-import { frontendErrorMessage } from '../helpers/backendError';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Input from "../../shared/components/Input";
+import Button from "../../shared/components/Button";
 
-const API_URL = import.meta.env.VITE_BACKEND_URL;
+const api = axios.create({
+  baseURL: import.meta.env.VITE_BACKEND_URL,
+});
 
 function SignupForm() {
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState("");
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues: {
-      username: '',
-      password: '',
-      role: 'User', // por defecto usuario normal
+      username: "",
+      email: "",
+      role: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
   const navigate = useNavigate();
+  const passwordValue = watch("password");
 
   const onValid = async (formData) => {
     try {
-      await axios.post(`${API_URL}/api/auth/register`, {
+      setErrorMessage("");
+
+      await api.post("/api/auth/register", {
         username: formData.username,
-        password: formData.password,
+        email: formData.email,
         role: formData.role,
+        password: formData.password,
       });
 
-      // Si todo salió bien, lo mando al login
-      navigate('/login');
+      navigate("/login");
     } catch (error) {
-      // mismo manejo de error que en login
-      if (error?.response?.data?.code) {
-        const code = error.response.data.code;
-        setErrorMessage(
-          frontendErrorMessage[code] ?? 'Error en el registro. Llame a soporte'
-        );
-      } else {
-        setErrorMessage('Error inesperado. Llame a soporte');
-      }
+      setErrorMessage(
+        error?.response?.data?.message || "Error al registrar usuario"
+      );
     }
   };
 
   return (
     <form
-      className='
-        flex
-        flex-col
-        gap-4
-        bg-white
-        p-8
-        sm:w-md
-        sm:rounded-lg
-        sm:shadow-lg
-      '
       onSubmit={handleSubmit(onValid)}
+      className="
+        flex flex-col gap-4 
+        bg-white p-8 
+        sm:w-md sm:rounded-lg sm:shadow-lg
+      "
     >
-      <h1 className='text-xl font-semibold mb-2'>Registrar Usuario</h1>
 
+      {/* Usuario */}
       <Input
-        label='Usuario'
-        {...register('username', {
-          required: 'Usuario es obligatorio',
+        label="Usuario"
+        {...register("username", {
+          required: "El usuario es obligatorio",
+          minLength: { value: 3, message: "Mínimo 3 caracteres" },
         })}
         error={errors.username?.message}
       />
 
+      {/* Email */}
       <Input
-        label='Contraseña'
-        type='password'
-        {...register('password', {
-          required: 'Contraseña es obligatoria',
-          minLength: {
-            value: 6,
-            message: 'Debe tener al menos 6 caracteres',
+        label="Email"
+        type="email"
+        {...register("email", {
+          required: "El email es obligatorio",
+          pattern: {
+            value: /\S+@\S+\.\S+/,
+            message: "Formato de email inválido",
           },
+        })}
+        error={errors.email?.message}
+      />
+
+      {/* Rol */}
+      <div className="flex flex-col gap-1">
+        <label className="font-semibold">Role</label>
+        <select
+          className="border p-2 rounded"
+          {...register("role", { required: "El rol es obligatorio" })}
+        >
+          <option value="">Seleccione una opción</option>
+          <option value="Admin">Admin</option>
+          <option value="User">User</option>
+        </select>
+        {errors.role && (
+          <span className="text-red-500">{errors.role.message}</span>
+        )}
+      </div>
+
+      {/* Contraseña */}
+      <Input
+        label="Contraseña"
+        type="password"
+        {...register("password", {
+          required: "La contraseña es obligatoria",
+          minLength: { value: 6, message: "Mínimo 6 caracteres" },
         })}
         error={errors.password?.message}
       />
 
-      {/* Si querés que el admin pueda elegir rol: */}
-      <div className='flex flex-col gap-1'>
-        <label className='text-sm font-medium'>Rol</label>
-        <select
-          className='border rounded px-3 py-2 text-sm'
-          {...register('role', { required: true })}
-        >
-          <option value='User'>User</option>
-          <option value='Admin'>Admin</option>
-        </select>
-      </div>
+      {/* Confirmar contraseña */}
+      <Input
+        label="Confirmar contraseña"
+        type="password"
+        {...register("confirmPassword", {
+          required: "Debe confirmar la contraseña",
+          validate: (value) =>
+            value === passwordValue || "Las contraseñas no coinciden",
+        })}
+        error={errors.confirmPassword?.message}
+      />
 
-      <Button type='submit'>Crear usuario</Button>
+      {/* Botones */}
+      <Button type="submit">Registrar Usuario</Button>
 
       <Button
-        type='button'
-        variant='secondary'
-        onClick={() => navigate('/login')}
+        type="button"
+        variant="secondary"
+        onClick={() => navigate("/login")}
       >
-        Volver al login
+        Inicio de Sesión
       </Button>
 
-      {errorMessage && <p className='text-red-500 mt-2'>{errorMessage}</p>}
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+      )}
     </form>
   );
 }
