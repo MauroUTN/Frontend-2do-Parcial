@@ -69,7 +69,15 @@ function LoginForm() {
       />
 
       <Button type='submit'>Iniciar Sesión</Button>
-      <Button variant='secondary' onClick={() => alert('Debe impletar navegacion y pagina de registro')}>Registrar Usuario</Button>
+
+      {/* 👇 NUEVO: ir a la página de registro */}
+      <Button
+        type='button'
+        variant='secondary'
+        onClick={() => navigate('/signup')}
+      >
+        Registrar Usuario
+      </Button>
       {errorMessage && <p className='text-red-500'>{errorMessage}</p>}
     </form>
   );

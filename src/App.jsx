@@ -7,6 +7,7 @@ import ListOrdersPage from './modules/orders/pages/ListOrdersPage';
 import Home from './modules/home/pages/Home';
 import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
+import SignupPage from './modules/auth/pages/SignupPage';
 
 
 function App() {
@@ -28,6 +29,11 @@ function App() {
     {
       path: '/login',
       element: <LoginPage />,
+    },
+    {
+      // 👇 NUEVO
+      path: '/signup',
+      element: <SignupPage />,
     },
     {
       path: '/admin',
