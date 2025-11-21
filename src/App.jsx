@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, Outlet, RouterProvider, Navigate } from 'react-router-dom';
 import { AuthProvider } from './modules/auth/context/AuthProvider';
 import LoginPage from './modules/auth/pages/LoginPage';
 import Dashboard from './modules/templates/components/Dashboard';
@@ -8,6 +8,9 @@ import Home from './modules/home/pages/Home';
 import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 
+// 1. IMPORTAR LOS NUEVOS PROVIDERS
+import { ProductProvider } from './modules/products/context/ProductProvider';
+import { CardProvider } from './modules/shared/context/CardProvider'; 
 
 function App() {
   const router = createBrowserRouter([
@@ -17,7 +20,8 @@ function App() {
       children: [
         {
           path: '/',
-          element: <>Listado de productos</>,
+          // AQUÍ ESTÁ EL CAMBIO: Redirige a /login automáticamente
+          element: <Navigate to="/login" replace />,
         },
         {
           path: '/cart',
@@ -31,9 +35,10 @@ function App() {
     },
     {
       path: '/admin',
-      element:/*  <ProtectedRoute> */
-          <Dashboard />,
-      /* </ProtectedRoute>, */
+      element: 
+          <ProtectedRoute>
+              <Dashboard />
+          </ProtectedRoute>,
       children: [
         {
           path: '/admin/home',
@@ -55,9 +60,14 @@ function App() {
     },
   ]);
 
+  // 2. AGREGARLOS EN EL RETURN, ANIDÁNDOLOS
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
+      <ProductProvider>
+        <CardProvider>
+          <RouterProvider router={router} />
+        </CardProvider>
+      </ProductProvider>
     </AuthProvider>
   );
 }
