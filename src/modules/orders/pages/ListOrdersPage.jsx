@@ -4,41 +4,42 @@ import { useState, useEffect } from 'react';
 import { listOrders } from '../services/listServices';
 
 const orderStatus = {
-    ALL: 'all',
-    PENDING: 'pending',
-    COMPLETED: 'completed',
-    CANCELLED: 'cancelled',
-    PROCESSING: 'processing',
-    SHIPPED: 'shipped',
+  ALL: 'all',
+  PENDING: 'pending',
+  COMPLETED: 'completed',
+  CANCELLED: 'cancelled',
+  PROCESSING: 'processing',
+  SHIPPED: 'shipped',
 }
 
 function ListOrdersPage() {
-    const [ searchTerm, setSearchTerm ] = useState('');
-    const [ status, setStatus ] = useState(orderStatus.ALL);
-    const [ pageNumber, setPageNumber ] = useState(1);
-    const [ pageSize, setPageSize ] = useState(10);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [status, setStatus] = useState(orderStatus.ALL);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-    const [ total, setTotal ] = useState(0);
-    const [ orders, setOrders ] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [orders, setOrders] = useState([]);
 
-    const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await listOrders(searchTerm, status, pageNumber, pageSize);
 
-    const fetchOrders = async () => {
-       try {
-         setLoading(true);
-         const { data, error } = await listOrders(searchTerm, status, pageNumber, pageSize);
-      
-         if (error) throw error;
-      
-         setTotal(data.total);
-         setOrders(data.productItems);
-       } catch (error) {
-         console.error(error);
-       } finally {
-         setLoading(false);
-       }
-     };
+      if (error) throw error;
+
+      setTotal(data.total);
+      setOrders(data.productItems);
+    } catch (error) {
+      console.error(error);
+      // Si hay error, aseguramos que orders sea un array vacío para no romper el map
+      setOrders([]); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -56,23 +57,17 @@ function ListOrdersPage() {
   };
 
   return (
-       <div>
+    <div>
       <Card>
-        <div
-          className='flex justify-between items-center mb-3'
-        >
-          <h1 className='text-3xl'>Ordernes</h1>
-          <Button
-            className='h-11 w-11 rounded-2xl sm:hidden'
-          >
+        <div className='flex justify-between items-center mb-3'>
+          <h1 className='text-3xl'>Ordenes</h1>
+          <Button className='h-11 w-11 rounded-2xl sm:hidden'>
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 11C4.44772 11 4 10.5523 4 10C4 9.44772 4.44772 9 5 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H5Z" fill="#000000"></path> <path d="M9 5C9 4.44772 9.44772 4 10 4C10.5523 4 11 4.44772 11 5V15C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15V5Z" fill="#000000"></path> </g></svg>
           </Button>
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
-          <div
-            className='flex items-center gap-3'
-          >
+          <div className='flex items-center gap-3'>
             <input value={searchTerm} onChange={(evt) => setSearchTerm(evt.target.value)} type="text" placeholder='Buscar' className='text-[1.3rem] w-full' />
             <Button className='h-11 w-11' onClick={handleSearch}>
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
@@ -93,7 +88,8 @@ function ListOrdersPage() {
         {
           loading
             ? <span>Buscando datos...</span>
-            : orders.map(order => (
+            // AQUÍ ESTÁ EL CAMBIO (Opción 2): (orders || []).map(...)
+            : (orders || []).map(order => (
               <Card key={order.id}>
                 <h1>{order.id} - {order.name}</h1>
                 <p className='text-base'>Stock: {order.stockQuantity} - ${order.currentUnitPrice} - {order.isActive ? 'Activado' : 'Desactivado'}</p>
@@ -110,9 +106,9 @@ function ListOrdersPage() {
         >
           Atras
         </button>
-        <span>{pageNumber} / {totalPages}</span>
+        <span>{pageNumber} / {totalPages || 1}</span>
         <button
-          disabled={ pageNumber === totalPages }
+          disabled={pageNumber === totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}
           className='bg-gray-200 disabled:bg-gray-100'
         >
@@ -134,7 +130,6 @@ function ListOrdersPage() {
         </select>
       </div>
     </div>
-
   );
 };
 

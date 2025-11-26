@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL,
+  // CAMBIO AQUÍ: Usamos '/api' para que Vite intercepte la llamada y la mande al puerto 5142
+  baseURL: '/', 
   withCredentials: true,
 });
 
@@ -21,7 +22,10 @@ instance.interceptors.request.use(
 instance.interceptors.response.use(
   (config) => { return config; },
   (error) => {
-    if (error.status === 401) {
+    // Nota: axios a veces devuelve el status dentro de error.response
+    const status = error.response ? error.response.status : null;
+
+    if (status === 401) {
       if (window.location.pathname.includes('/admin/')) {
         localStorage.clear();
         window.location.href = '/login';
