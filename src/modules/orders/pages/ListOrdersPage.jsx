@@ -1,136 +1,115 @@
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
-import { useState, useEffect } from 'react';
-import { listOrders } from '../services/listServices';
+import { useOrders } from '../hook/useOrders';
 
+// Asegúrate de que estos valores coincidan EXACTAMENTE con lo que devuelve tu Backend (C#)
 const orderStatus = {
   ALL: 'all',
-  PENDING: 'pending',
-  COMPLETED: 'completed',
-  CANCELLED: 'cancelled',
-  PROCESSING: 'processing',
-  SHIPPED: 'shipped',
-}
+  PENDING: 'Pending',
+  COMPLETED: 'Delivered', 
+  CANCELLED: 'Cancelled',
+  PROCESSING: 'Processing',
+  SHIPPED: 'Shipped',
+};
 
 function ListOrdersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [status, setStatus] = useState(orderStatus.ALL);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const { 
+    orders, loading, total, 
+    pageNumber, setPageNumber, 
+    pageSize, setPageSize,
+    setSearchTerm, setStatus,
+    refreshOrders
+  } = useOrders();
 
-  const [total, setTotal] = useState(0);
-  const [orders, setOrders] = useState([]);
-
-  const [loading, setLoading] = useState(false);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await listOrders(searchTerm, status, pageNumber, pageSize);
-
-      if (error) throw error;
-
-      setTotal(data.total);
-      setOrders(data.productItems);
-    } catch (error) {
-      console.error(error);
-      // Si hay error, aseguramos que orders sea un array vacío para no romper el map
-      setOrders([]); 
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchOrders();
-  }, [status, pageSize, pageNumber]);
-
-  useEffect(() => {
-    setPageNumber(1);
-  }, [status]);
-
-  const totalPages = Math.ceil(total / pageSize);
-
-  const handleSearch = async () => {
-    setPageNumber(1);
-    await fetchOrders();
-  };
+  const totalPages = Math.ceil(total / pageSize) || 1;
 
   return (
     <div>
       <Card>
         <div className='flex justify-between items-center mb-3'>
-          <h1 className='text-3xl'>Ordenes</h1>
-          <Button className='h-11 w-11 rounded-2xl sm:hidden'>
-            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 11C4.44772 11 4 10.5523 4 10C4 9.44772 4.44772 9 5 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H5Z" fill="#000000"></path> <path d="M9 5C9 4.44772 9.44772 4 10 4C10.5523 4 11 4.44772 11 5V15C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15V5Z" fill="#000000"></path> </g></svg>
+          <h1 className='text-3xl'>Órdenes</h1>
+          <Button onClick={refreshOrders} className='hidden sm:block'>
+            Refrescar
           </Button>
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
-          <div className='flex items-center gap-3'>
-            <input value={searchTerm} onChange={(evt) => setSearchTerm(evt.target.value)} type="text" placeholder='Buscar' className='text-[1.3rem] w-full' />
-            <Button className='h-11 w-11' onClick={handleSearch}>
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-            </Button>
+          <div className='flex items-center gap-3 w-full'>
+            <input 
+              onChange={(evt) => setSearchTerm(evt.target.value)} 
+              type="text" 
+              placeholder='Buscar cliente...' 
+              className='text-[1.3rem] w-full border p-1 rounded' 
+            />
           </div>
-          <select onChange={evt => setStatus(evt.target.value)} className='text-[1.3rem]'>
+          <select 
+            onChange={evt => setStatus(evt.target.value)} 
+            className='text-[1.3rem] border p-1 rounded bg-white'
+          >
             <option value={orderStatus.ALL}>Todos</option>
             <option value={orderStatus.PENDING}>Pendientes</option>
-            <option value={orderStatus.COMPLETED}>Completados</option>
-            <option value={orderStatus.CANCELLED}>Cancelados</option>
             <option value={orderStatus.PROCESSING}>Procesando</option>
             <option value={orderStatus.SHIPPED}>Enviados</option>
+            <option value={orderStatus.COMPLETED}>Entregados</option>
+            <option value={orderStatus.CANCELLED}>Cancelados</option>
           </select>
         </div>
       </Card>
 
       <div className='mt-4 flex flex-col gap-4'>
-        {
-          loading
-            ? <span>Buscando datos...</span>
-            // AQUÍ ESTÁ EL CAMBIO (Opción 2): (orders || []).map(...)
-            : (orders || []).map(order => (
-              <Card key={order.id}>
-                <h1>{order.id} - {order.name}</h1>
-                <p className='text-base'>Stock: {order.stockQuantity} - ${order.currentUnitPrice} - {order.isActive ? 'Activado' : 'Desactivado'}</p>
-              </Card>
-            ))
-        }
+        {loading ? (
+          <p className="text-center text-gray-500">Cargando órdenes...</p>
+        ) : orders.length === 0 ? (
+           <p className="text-center text-gray-500">No se encontraron órdenes.</p>
+        ) : (
+          orders.map(order => (
+            <Card key={order.id}>
+              <div className="flex justify-between items-center">
+                <div>
+                  {/* Intenta mostrar el nombre, si no existe muestra "Cliente" */}
+                  <h2 className="font-bold text-xl">
+                    #{order.id} - {order.customerName || order.clientName || "Cliente"}
+                  </h2>
+                  
+                  <span className={`text-sm px-2 py-1 rounded-full font-medium ${
+                    order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                    order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                    order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                    'bg-blue-100 text-blue-800'
+                  }`}>
+                    {order.status}
+                  </span>
+                  {/* Muestra el total si existe */}
+                  <span className="ml-3 text-gray-500">
+                    Total: ${order.totalAmount || order.total || 0}
+                  </span>
+                </div>
+                <Button variant="secondary">Ver</Button>
+              </div>
+            </Card>
+          ))
+        )}
       </div>
 
-      <div className='flex justify-center items-center mt-3'>
+      <div className='flex justify-center items-center mt-3 gap-4'>
         <button
           disabled={pageNumber === 1}
           onClick={() => setPageNumber(pageNumber - 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
+          className='bg-gray-200 px-3 py-1 rounded disabled:opacity-50'
         >
-          Atras
+          Atrás
         </button>
-        <span>{pageNumber} / {totalPages || 1}</span>
+        <span>{pageNumber} / {totalPages}</span>
         <button
-          disabled={pageNumber === totalPages}
+          disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}
-          className='bg-gray-200 disabled:bg-gray-100'
+          className='bg-gray-200 px-3 py-1 rounded disabled:opacity-50'
         >
           Siguiente
         </button>
-
-        <select
-          value={pageSize}
-          onChange={evt => {
-            setPageNumber(1);
-            setPageSize(Number(evt.target.value));
-          }}
-          className='ml-3'
-        >
-          <option value="2">2</option>
-          <option value="10">10</option>
-          <option value="15">15</option>
-          <option value="20">20</option>
-        </select>
       </div>
     </div>
   );
-};
+}
 
 export default ListOrdersPage;

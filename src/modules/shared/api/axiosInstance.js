@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const instance = axios.create({
   // CAMBIO AQUÍ: Usamos '/api' para que Vite intercepte la llamada y la mande al puerto 5142
-  baseURL: '/', 
+  baseURL: '/api', 
   withCredentials: true,
 });
 

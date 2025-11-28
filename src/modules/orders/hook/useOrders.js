@@ -1,34 +1,45 @@
 import { useState, useEffect } from 'react';
 import { getOrders } from '../services/orderService';
 
-const useOrders = () => {
+export const useOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  // Estados para filtros
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [status, setStatus] = useState('all');
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await getOrders(searchTerm, status, pageNumber, pageSize);
+      
+      if (error) throw new Error(error);
+
+      if (data) {
+        setOrders(data.productItems || []);
+        setTotal(data.total || 0);
+      }
+    } catch (err) {
+      console.error(err);
+      setOrders([]); 
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const { data } = await getOrders(searchTerm, status);
-      if (data) {
-  setOrders(data.items || []); // <--- Agrega el "|| []" aquí
-  setTotal(data.total || 0);
-} else {
-  setOrders([]); // <--- Y si no hay data, setea vacío
-}
-    };
-
-    fetchData();
-  }, [searchTerm, status]); // Se recarga cuando cambian los filtros
+    fetchOrders();
+  }, [searchTerm, status, pageNumber, pageSize]);
 
   return {
-    orders,
-    loading,
-    setSearchTerm,
-    setStatus
+    orders, total, loading,
+    searchTerm, setSearchTerm,
+    status, setStatus,
+    pageNumber, setPageNumber,
+    pageSize, setPageSize,
+    refreshOrders: fetchOrders
   };
 };
-
-export default useOrders;

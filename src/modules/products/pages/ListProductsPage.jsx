@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-import useProducts from '../hook/useProducts'; // 1. Importamos el Hook
+import useProducts from '../hook/useProducts'; // Importamos el Hook
 
 function ListProductsPage() {
   const navigate = useNavigate();
 
-  // 2. Extraemos todo del Hook (ya no hay useState ni useEffect aquí)
+  // Extraemos todo del Hook
   const {
     products,
     loading,
@@ -20,7 +20,7 @@ function ListProductsPage() {
     setPageSize,
     totalPages,
     handleSearch,
-    productStatus // Constantes traídas del provider
+    productStatus 
   } = useProducts();
 
   return (
@@ -30,7 +30,6 @@ function ListProductsPage() {
           <h1 className='text-3xl'>Productos</h1>
           {/* Botón Mobile */}
           <Button className='h-11 w-11 rounded-2xl sm:hidden'>
-             {/* ... tu SVG ... */}
              <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 11C4.44772 11 4 10.5523 4 10C4 9.44772 4.44772 9 5 9H15C15.5523 9 16 9.44772 16 10C16 10.5523 15.5523 11 15 11H5Z" fill="#000000"></path> <path d="M9 5C9 4.44772 9.44772 4 10 4C10.5523 4 11 4.44772 11 5V15C11 15.5523 10.5523 16 10 16C9.44772 16 9 15.5523 9 15V5Z" fill="#000000"></path></svg>
           </Button>
 
@@ -54,12 +53,11 @@ function ListProductsPage() {
               className='text-[1.3rem] w-full'
             />
             <Button className='h-11 w-11' onClick={handleSearch}>
-               {/* ... tu SVG ... */}
                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15.7955 15.8111L21 21M18 10.5C18 14.6421 14.6421 18 10.5 18C6.35786 18 3 14.6421 3 10.5C3 6.35786 6.35786 3 10.5 3C14.6421 3 18 6.35786 18 10.5Z" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path></svg>
             </Button>
           </div>
           <select
-            value={status} // Agregué el value para controlar el select
+            value={status}
             onChange={(evt) => setStatus(evt.target.value)}
             className='text-[1.3rem]'
           >
@@ -70,22 +68,36 @@ function ListProductsPage() {
         </div>
       </Card>
 
-      {/* Listado */}
+      {/* --- AQUÍ ESTÁ LA PROTECCIÓN Y DEPURACIÓN --- */}
       <div className='mt-4 flex flex-col gap-4'>
         {loading ? (
-          <span>Buscando datos...</span>
+          <p className="text-center p-4">Buscando datos...</p>
         ) : (
-          products.map((product) => (
-            <Card key={product.sku}>
-              <h1>
-                {product.sku} - {product.name}
-              </h1>
-              <p className='text-base'>
-                Stock: {product.stockQuantity} - ${product.currentUnitPrice} -{' '}
-                {product.isActive ? 'Activado' : 'Desactivado'}
-              </p>
-            </Card>
-          ))
+          // SI ES UN ARRAY REAL, LO MOSTRAMOS
+          Array.isArray(products) ? (
+             products.length > 0 ? (
+                products.map((product) => (
+                  <Card key={product.sku || product.id}>
+                    <h1>{product.sku} - {product.name}</h1>
+                    <p className='text-base'>
+                      Stock: {product.stockQuantity} - ${product.currentUnitPrice} -{' '}
+                      {product.isActive ? 'Activado' : 'Desactivado'}
+                    </p>
+                  </Card>
+                ))
+             ) : (
+                <p className="text-center text-gray-500">No se encontraron productos.</p>
+             )
+          ) : (
+             // SI NO ES ARRAY, MOSTRAMOS ESTE CUADRO ROJO PARA DEPURAR
+             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <strong className="font-bold">Error de formato! </strong>
+                <span className="block sm:inline">El backend no envió una lista. Esto es lo que llegó:</span>
+                <pre className="mt-2 bg-white p-2 text-xs overflow-auto max-h-40 border border-red-200">
+                   {JSON.stringify(products, null, 2)}
+                </pre>
+             </div>
+          )
         )}
       </div>
 
@@ -99,7 +111,7 @@ function ListProductsPage() {
           Atras
         </button>
         <span className="mx-3">
-          {pageNumber} / {totalPages || 1} {/* fallback por si totalPages es 0 o NaN */}
+          {pageNumber} / {totalPages || 1}
         </span>
         <button
           disabled={pageNumber >= totalPages}

@@ -3,7 +3,7 @@ import { instance } from '../../shared/api/axiosInstance';
 export const login = async (username, password) => {
   try {
     // Axios lanza una excepción si el status no es 2xx (ej: 400, 401, 500)
-    const response = await instance.post('api/auth/login', { username, password });
+    const response = await instance.post('/auth/login', { username, password });
 
     // Si llegamos aquí, es porque todo salió bien (Status 200-299)
     // Asegúrate si tu backend devuelve { token: "..." } o directo el token
