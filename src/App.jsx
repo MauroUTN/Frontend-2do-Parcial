@@ -9,6 +9,7 @@ import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import CatalogPage from './modules/home/pages/CatalogPage'; 
 import SignUpPage from './modules/auth/pages/SignUpPage';
+import CartPage from './modules/cart/pages/CartPage';
 
 // 1. IMPORTAR LOS PROVIDERS
 import { ProductProvider } from './modules/products/context/ProductProvider';
@@ -28,7 +29,8 @@ function App() {
         },
         {
           path: '/cart',
-          element: <>Carrito de compras</>,
+          element: <CartPage />, 
+         
         },
       ],
     },
