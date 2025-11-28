@@ -1,0 +1,15 @@
+import { instance } from '../../shared/api/axiosInstance';
+
+export const registerUser = async (userData) => {
+  try {
+    // La URL basada en el PDF: /api/auth/register
+    const response = await instance.post('/auth/register', userData);
+    return { data: response.data, error: null };
+  } catch (error) {
+    console.error("Error en registro:", error);
+    return { 
+      data: null, 
+      error: error.response?.data?.detail || 'Error al registrar usuario' 
+    };
+  }
+};

@@ -7,21 +7,24 @@ import ListOrdersPage from './modules/orders/pages/ListOrdersPage';
 import Home from './modules/home/pages/Home';
 import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
+import CatalogPage from './modules/home/pages/CatalogPage'; 
+import SignUpPage from './modules/auth/pages/SignUpPage';
 
-// 1. IMPORTAR LOS NUEVOS PROVIDERS
+// 1. IMPORTAR LOS PROVIDERS
 import { ProductProvider } from './modules/products/context/ProductProvider';
 import { CardProvider } from './modules/shared/context/CardProvider'; 
 
 function App() {
   const router = createBrowserRouter([
+    // --- ZONA PÚBLICA (CLIENTES) ---
     {
       path: '/',
-      element: <><Outlet /></>,
+      element: <><Outlet /></>, // Aquí podrías agregar un <Navbar /> público más adelante
       children: [
         {
           path: '/',
-          // AQUÍ ESTÁ EL CAMBIO: Redirige a /login automáticamente
-          element: <Navigate to="/login" replace />,
+          // CAMBIO REALIZADO: Ahora muestra el catálogo en lugar de ir al login
+          element: <CatalogPage />, 
         },
         {
           path: '/cart',
@@ -29,10 +32,19 @@ function App() {
         },
       ],
     },
+    
+    // --- LOGIN ---
     {
       path: '/login',
       element: <LoginPage />,
     },
+    // --- SIGNUP ---
+    {
+      path: '/register', 
+      element: <SignUpPage />,
+    },
+
+    // --- ZONA PRIVADA (ADMINISTRADOR) ---
     {
       path: '/admin',
       element: 
@@ -60,7 +72,6 @@ function App() {
     },
   ]);
 
-  // 2. AGREGARLOS EN EL RETURN, ANIDÁNDOLOS
   return (
     <AuthProvider>
       <ProductProvider>
