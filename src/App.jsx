@@ -9,8 +9,7 @@ import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import CatalogPage from './modules/home/pages/CatalogPage'; 
 import SignUpPage from './modules/auth/pages/SignUpPage';
-
-// 1. IMPORTAR LOS PROVIDERS
+import ClientLayout from './modules/templates/components/ClientLayout';
 import { ProductProvider } from './modules/products/context/ProductProvider';
 import { CardProvider } from './modules/shared/context/CardProvider'; 
 
@@ -19,16 +18,15 @@ function App() {
     // --- ZONA PÚBLICA (CLIENTES) ---
     {
       path: '/',
-      element: <><Outlet /></>, // Aquí podrías agregar un <Navbar /> público más adelante
+     element: <ClientLayout />, 
       children: [
         {
           path: '/',
-          // CAMBIO REALIZADO: Ahora muestra el catálogo en lugar de ir al login
-          element: <CatalogPage />, 
+          element: <CatalogPage />, // Se renderiza DENTRO del ClientLayout
         },
         {
           path: '/cart',
-          element: <>Carrito de compras</>,
+          element: <div>Aquí va el Carrito</div>, // Se renderiza DENTRO del ClientLayout
         },
       ],
     },

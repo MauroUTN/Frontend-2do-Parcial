@@ -17,125 +17,135 @@ function SignUpForm() {
     formState: { errors } 
   } = useForm();
 
-  // Observamos la contraseña para validarla contra la confirmación
   const password = watch("password");
 
   const onSubmit = async (data) => {
     setBackendError('');
     
-    // Preparamos los datos según lo que espera tu API (revisar Swagger)
+    // --- CORRECCIÓN CRÍTICA ---
     const payload = {
-      userName: data.username,
-      email: data.email,
-      password: data.password,
-      rol: data.role, // Asegúrate que el backend espera "rol" o "role"
-      name: data.username // O agrega un campo extra si lo necesitas
+      Username: data.username,
+      Email: data.email,
+      Password: data.password,
+      
+      // EL BACKEND PIDE "Rol", NO "role" NI "Role"
+      Rol: data.role, 
+      
+      Name: data.username 
     };
+
+    console.log("Enviando:", payload); // Para verificar en consola
 
     const { error } = await registerUser(payload);
 
     if (error) {
-      setBackendError(error);
+      // Si el error es objeto (ej: validación), lo hacemos texto
+      setBackendError(typeof error === 'object' ? JSON.stringify(error) : error);
     } else {
-      alert("Usuario registrado con éxito");
+      alert("Usuario registrado con éxito. Ahora inicia sesión.");
       navigate('/login');
     }
   };
 
   return (
-    <Card>
-      <div className="w-full sm:w-[400px] p-4 flex flex-col gap-4">
+    <Card className="w-full max-w-[450px] p-8 shadow-lg bg-white rounded-xl">
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        {/* Usuario */}
+        <Input
+          label="Usuario"
+          placeholder="Nombre de usuario"
+          error={errors.username?.message}
+          {...register("username", { required: "El usuario es requerido" })}
+        />
+
+        {/* Email */}
+        <Input
+          label="Email"
+          type="email"
+          placeholder="correo@ejemplo.com"
+          error={errors.email?.message}
+          {...register("email", { 
+            required: "El email es requerido",
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: "Email inválido"
+            }
+          })}
+        />
+
+        {/* SELECTOR DE ROL */}
+        <div className="flex flex-col w-full">
+          <label className="mb-1 font-medium text-gray-700">Role</label>
+          <select
+            className={`
+              w-full border rounded-lg p-2 outline-none bg-white transition-all
+              focus:ring-2 focus:ring-purple-200 
+              ${errors.role ? 'border-red-400' : 'border-gray-300'}
+            `}
+            // Valor por defecto para evitar errores de campo vacío
+            defaultValue="User"
+            {...register("role", { required: "Debes seleccionar un rol" })}
+          >
+            {/* Value = Lo que va a la BD ("Admin"/"User") */}
+            {/* Texto = Lo que ve la persona ("Administrador"/"Cliente") */}
+            <option value="Admin">Administrador</option>
+            <option value="User">Cliente</option>
+          </select>
+          {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>}
+        </div>
+
+        {/* Contraseña */}
+        <Input
+          label="Contraseña"
+          type="password"
+          error={errors.password?.message}
+          {...register("password", { 
+            required: "La contraseña es requerida",
+            minLength: { value: 8, message: "Mínimo 8 caracteres" }
+          })}
+        />
+
+        {/* Confirmar Contraseña */}
+        <Input
+          label="Confirmar contraseña"
+          type="password"
+          error={errors.confirmPassword?.message}
+          {...register("confirmPassword", { 
+            required: "Confirma tu contraseña",
+            validate: value => value === password || "Las contraseñas no coinciden"
+          })}
+        />
+
+        {/* Mensaje de Error del Backend */}
+        {backendError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm text-center">
+            {backendError}
+          </div>
+        )}
+
+        {/* Botones */}
+        <div className="flex flex-col gap-3 mt-4">
           
-          {/* Usuario */}
-          <Input
-            label="Usuario"
-            placeholder="Nombre de usuario"
-            error={errors.username?.message}
-            {...register("username", { required: "El usuario es requerido" })}
-          />
+          <Button 
+            type="submit" 
+            variant="default" 
+            className="w-full justify-center py-2.5 font-semibold"
+          >
+            Registrar Usuario
+          </Button>
 
-          {/* Email */}
-          <Input
-            label="Email"
-            type="email"
-            placeholder="correo@ejemplo.com"
-            error={errors.email?.message}
-            {...register("email", { 
-              required: "El email es requerido",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: "Email inválido"
-              }
-            })}
-          />
+          <Button 
+            type="button" 
+            variant="secondary" 
+            className="w-full justify-center py-2.5 font-semibold"
+            onClick={() => navigate('/login')}
+          >
+            Inicio de Sesión
+          </Button>
+        </div>
 
-          {/* Selector de Rol (Select nativo con estilos de Tailwind) */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-gray-700">Role</label>
-            <select
-              className="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:border-purple-500 bg-white"
-              {...register("role", { required: "Debes seleccionar un rol" })}
-            >
-              <option value="">Seleccione una opción</option>
-              <option value="Administrador">Administrador</option>
-              <option value="Cliente">Cliente</option>
-            </select>
-            {errors.role && <span className="text-xs text-red-500">{errors.role.message}</span>}
-          </div>
-
-          {/* Contraseña */}
-          <Input
-            label="Contraseña"
-            type="password"
-            error={errors.password?.message}
-            {...register("password", { 
-              required: "La contraseña es requerida",
-              minLength: { value: 8, message: "Mínimo 8 caracteres" }
-            })}
-          />
-
-          {/* Confirmar Contraseña */}
-          <Input
-            label="Confirmar contraseña"
-            type="password"
-            error={errors.confirmPassword?.message}
-            {...register("confirmPassword", { 
-              required: "Confirma tu contraseña",
-              validate: value => value === password || "Las contraseñas no coinciden"
-            })}
-          />
-
-          {/* Mensaje de Error del Backend */}
-          {backendError && (
-            <p className="text-red-500 text-sm text-center">{backendError}</p>
-          )}
-
-          {/* Botones */}
-          <div className="flex flex-col gap-3 mt-4">
-            {/* Botón Principal: Registrar (Violeta) */}
-            <Button 
-              type="submit" 
-              variant="default" 
-              className="w-full justify-center"
-            >
-              Registrar Usuario
-            </Button>
-
-            {/* Botón Secundario: Ir a Login (Gris) */}
-            <Button 
-              type="button" 
-              variant="secondary" 
-              className="w-full justify-center"
-              onClick={() => navigate('/login')}
-            >
-              Inicio de Sesión
-            </Button>
-          </div>
-
-        </form>
-      </div>
+      </form>
     </Card>
   );
 }
