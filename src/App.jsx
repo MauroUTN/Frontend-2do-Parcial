@@ -9,6 +9,9 @@ import ListProductsPage from './modules/products/pages/ListProductsPage';
 import CreateProductPage from './modules/products/pages/CreateProductPage';
 import CatalogPage from './modules/home/pages/CatalogPage'; 
 import SignUpPage from './modules/auth/pages/SignUpPage';
+import CartPage from './modules/cart/pages/CartPage';
+
+// 1. IMPORTAR LOS PROVIDERS
 import ClientLayout from './modules/templates/components/ClientLayout';
 import { ProductProvider } from './modules/products/context/ProductProvider';
 import { CardProvider } from './modules/shared/context/CardProvider'; 
@@ -26,7 +29,7 @@ function App() {
         },
         {
           path: '/cart',
-          element: <div>Aquí va el Carrito</div>, // Se renderiza DENTRO del ClientLayout
+          element: <>Carrito de compras</>,
         },
       ],
     },
