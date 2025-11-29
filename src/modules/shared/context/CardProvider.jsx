@@ -1,27 +1,47 @@
-import { createContext, useState } from 'react';
+import { createContext, useState, useEffect } from 'react';
 
-// 1. Creas el contexto
-const CardContext = createContext();
+export const CardContext = createContext();
 
-function CardProvider({ children }) {
+export function CardProvider({ children }) {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
 
-  const addItem = (item) => {
-    setItems([...items, item]);
+  // Cargar
+  useEffect(() => {
+    const stored = localStorage.getItem('cart');
+    if (stored) setItems(JSON.parse(stored));
+  }, []);
+
+  // Guardar y Calcular Total
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(items));
+    const newTotal = items.reduce((acc, item) => acc + (item.unitPrice * item.quantity), 0);
+    setTotal(newTotal);
+  }, [items]);
+
+  const addItem = (product, quantity) => {
+    setItems(prev => {
+      const existing = prev.find(x => x.productId === product.productId);
+      if (existing) {
+        return prev.map(x => x.productId === product.productId ? { ...x, quantity: x.quantity + quantity } : x);
+      }
+      return [...prev, { ...product, quantity }];
+    });
   };
 
-  const removeItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+  const updateQuantity = (productId, q) => {
+    if (q < 1) return removeItem(productId);
+    setItems(prev => prev.map(x => x.productId === productId ? { ...x, quantity: q } : x));
   };
+
+  const removeItem = (id) => setItems(prev => prev.filter(x => x.productId !== id));
+  const clearCart = () => setItems([]);
 
   return (
-    // 2. Provees los valores
-    <CardContext.Provider value={{ items, total, addItem, removeItem }}>
+    <CardContext.Provider value={{ items, total, addItem, updateQuantity, removeItem, clearCart }}>
       {children}
     </CardContext.Provider>
   );
 }
 
-// 3. Exportas ambos
-export { CardProvider, CardContext };
+export default CardProvider;

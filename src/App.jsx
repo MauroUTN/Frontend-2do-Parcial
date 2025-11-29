@@ -29,7 +29,7 @@ function App() {
         },
         {
           path: '/cart',
-          element: <>Carrito de compras</>,
+          element: <CartPage/>,
         },
       ],
     },
