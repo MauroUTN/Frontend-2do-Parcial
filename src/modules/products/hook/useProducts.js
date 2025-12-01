@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { getProducts } from '../services/list'; // Importamos el servicio real
+import { getProducts } from '../services/list';
 
 const useProducts = () => {
   const [products, setProducts] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
-  
-  // Filtros
-  const [searchTerm, setSearchTerm] = useState('');
+
+  // Estados para los filtros
+  const [searchTerm, setSearchTerm] = useState(''); // Lo que escribes en el input
+  const [appliedSearch, setAppliedSearch] = useState(''); // Lo que realmente se busca al dar click
   const [status, setStatus] = useState('all');
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -15,34 +16,45 @@ const useProducts = () => {
   const loadProducts = async () => {
     setLoading(true);
     try {
-        const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize);
-        
-        if (data) {
-            // IMPORTANTE: Usamos "|| []" para que no explote si viene vacío
-            setProducts(data.productItems || []);
-            setTotal(data.total || 0);
-        }
+      // Usamos 'appliedSearch' (lo confirmado) en lugar de 'searchTerm' (lo que se está escribiendo)
+      const { data } = await getProducts(appliedSearch, status, pageNumber, pageSize);
+      
+      if (data) {
+        setProducts(data.productItems || []);
+        setTotal(data.total || 0);
+      }
     } catch (err) {
-        setProducts([]); // Si falla, lista vacía para evitar errores
+      setProducts([]);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
+  // 1. Recargar cuando cambie Página, Tamaño o Estado (Filtro)
   useEffect(() => {
     loadProducts();
-  }, [searchTerm, status, pageNumber, pageSize]);
+  }, [pageNumber, pageSize, status, appliedSearch]); 
 
-  // Exponemos todo lo que necesita la página
+  // Función para el botón "Buscar"
+  const handleSearch = () => {
+    setPageNumber(1); // Reseteamos a la página 1 al buscar
+    setAppliedSearch(searchTerm); // Confirmamos el término de búsqueda
+  };
+
+  // Función para manejar cambio de página
+  const handlePageChange = (newPage) => {
+    setPageNumber(newPage);
+  };
+
   return {
     products, total, loading,
     searchTerm, setSearchTerm,
     status, setStatus,
-    pageNumber, setPageNumber,
-    pageSize, setPageSize,
-    // Constantes para el select (si las necesitas)
-    productStatus: { ALL: 'all', ENABLED: 'enabled', DISABLED: 'disabled' },
-    refresh: loadProducts
+    pageNumber, pageSize, setPageSize,
+    handleSearch,
+    handlePageChange,
+    totalPages: Math.ceil(total / pageSize),
+    productStatus: { ALL: 'all', ENABLED: 'enabled', DISABLED: 'disabled' }
   };
 };
 

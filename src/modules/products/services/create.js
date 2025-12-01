@@ -1,12 +1,9 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const createProduct = async (formData) => {
-  await instance.post('/api/products', {
-    sku: formData.sku,
-    internalCode: formData.cui,
-    name: formData.name,
-    description: formData.description,
-    currentUnitPrice: formData.price,
-    stockQuantity: formData.stock,
-  });
+export const createProduct = async (productData) => {
+  // DEBE ESTAR ASÍ: Pasando productData directo
+  const response = await instance.post('/products', productData);
+  
+  console.log("RESPUESTA DEL SERVIDOR:", response.data); // <--- Agregamos esto para ver qué dice
+  return response.data;
 };
