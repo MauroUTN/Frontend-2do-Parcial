@@ -1,23 +1,45 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'; // Agregamos useLocation
+import { Outlet, useNavigate, useLocation } from 'react-router-dom'; 
 
 import Button from '../../shared/components/Button';
 import Input from '../../shared/components/Input';
 import Modal from '../../shared/components/Modal';
 import ClientLoginForm from '../../home/components/ClientLoginForm';
 import ClientRegisterForm from '../../home/components/ClientRegisterForm';
+import useCard from '../../shared/hook/useCard'; // <--- 1. IMPORTAMOS EL HOOK DEL CARRITO
 
 const ClientLayout = () => {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook para saber en qué página estás
-  
+  const location = useLocation(); 
+  const { items } = useCard(); // <--- 2. EXTRAEMOS LOS ÍTEMS DEL CARRITO
+
   const [activeModal, setActiveModal] = useState(null);
   const [isLogged, setIsLogged] = useState(false);
+  
+  // Estado para controlar la animación
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     setIsLogged(!!token);
   }, []);
+
+  // 3. EFECTO DE ANIMACIÓN: Se dispara cada vez que 'items' cambia
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    setIsAnimating(true);
+    
+    // Quitamos la animación después de 300ms
+    const timer = setTimeout(() => {
+      setIsAnimating(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [items]); // Escucha cambios en el carrito
+
+  // Calcular cantidad total de productos para el badge
+  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
 
   const closeModal = () => setActiveModal(null);
 
@@ -33,14 +55,23 @@ const ClientLayout = () => {
     setIsLogged(true);
   };
 
-  // Función auxiliar para estilo activo
   const getNavLinkClass = (path) => {
-    // Si la ruta actual coincide con el path, devolvemos el estilo activo (fondo gris)
     const isActive = location.pathname === path;
+    // Base de clases
+    let classes = "cursor-pointer px-4 py-2 font-semibold text-sm transition-all duration-300 flex items-center gap-2 ";
     
-    return isActive 
-      ? "text-black cursor-pointer bg-gray-100 px-4 py-2 rounded-full font-semibold text-sm" // Activo
-      : "cursor-pointer hover:text-black transition-colors px-4 py-2 font-semibold text-sm text-gray-500"; // Inactivo
+    if (isActive) {
+        classes += "text-black bg-gray-100 rounded-full ";
+    } else {
+        classes += "text-gray-500 hover:text-black ";
+    }
+
+    // 4. SI ES EL CARRITO Y ESTÁ ANIMANDO, AGREGAMOS EFECTO
+    if (path === '/cart' && isAnimating) {
+        classes += " scale-110 text-purple-600 font-bold"; // Efecto de "Zoom" y cambio de color
+    }
+
+    return classes;
   };
 
   return (
@@ -66,7 +97,6 @@ const ClientLayout = () => {
           </div>
           
           <nav className="hidden lg:flex gap-4 items-center">
-            {/* Botón PRODUCTOS */}
             <span 
               className={getNavLinkClass('/')} 
               onClick={() => navigate('/')}
@@ -74,12 +104,22 @@ const ClientLayout = () => {
               Productos
             </span>
             
-            {/* Botón CARRITO */}
+            {/* BOTÓN CARRITO CON BADGE */}
             <span 
               className={getNavLinkClass('/cart')} 
               onClick={() => navigate('/cart')}
             >
-              Carrito de compras
+              Carrito
+              {/* Badge contador */}
+              {totalItems > 0 && (
+                  <span className={`
+                    ml-1 px-2 py-0.5 text-xs rounded-full 
+                    ${isAnimating ? 'bg-purple-600 text-white' : 'bg-gray-200 text-gray-700'}
+                    transition-colors duration-300
+                  `}>
+                    {totalItems}
+                  </span>
+              )}
             </span>
           </nav>
         </div>
