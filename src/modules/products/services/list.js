@@ -1,6 +1,6 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const getProducts = async (name = '', status = 'todos', page = 1, pageSize = 10) => {
+export const getProducts = async (name = '', status = 'todos', page = 1, pageSize) => {
   try {
     const params = new URLSearchParams();
 /*     if (status.toLowerCase() == 'all')
@@ -39,7 +39,7 @@ export const getProducts = async (name = '', status = 'todos', page = 1, pageSiz
       data: {
         // Adaptamos la respuesta (C# suele devolver PascalCase: Items, TotalCount)
         productItems: response.data.items || response.data.Items || [], 
-        total: response.data.totalCount || response.data.TotalCount || 0 
+        total: response.data.totalPages || response.data.totalPages || 0 
       }, 
       error: null 
     };

@@ -53,7 +53,7 @@ const useProducts = () => {
     pageNumber, pageSize, setPageSize,
     handleSearch,
     handlePageChange,
-    totalPages: Math.ceil(total / pageSize),
+    totalPages: total,
     productStatus: { ALL: 'todos', ENABLED: 'true', DISABLED: 'false' }
   };
 };
