@@ -9,7 +9,7 @@ const useProducts = () => {
   // Estados para los filtros
   const [searchTerm, setSearchTerm] = useState(''); // Lo que escribes en el input
   const [appliedSearch, setAppliedSearch] = useState(''); // Lo que realmente se busca al dar click
-  const [status, setStatus] = useState('all');
+  const [status, setStatus] = useState('todos');
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -18,7 +18,7 @@ const useProducts = () => {
     try {
       // Usamos 'appliedSearch' (lo confirmado) en lugar de 'searchTerm' (lo que se está escribiendo)
       const { data } = await getProducts(appliedSearch, status, pageNumber, pageSize);
-      
+      console.log("Datos recibidos en useProducts:", data);
       if (data) {
         setProducts(data.productItems || []);
         setTotal(data.total || 0);
@@ -54,7 +54,7 @@ const useProducts = () => {
     handleSearch,
     handlePageChange,
     totalPages: Math.ceil(total / pageSize),
-    productStatus: { ALL: 'all', ENABLED: 'enabled', DISABLED: 'disabled' }
+    productStatus: { ALL: 'todos', ENABLED: 'true', DISABLED: 'false' }
   };
 };
 

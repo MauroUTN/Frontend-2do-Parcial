@@ -1,36 +1,51 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const getProducts = async (searchTerm = '', status = '', page = 1, pageSize = 10) => {
+export const getProducts = async (name = '', status = 'todos', page = 1, pageSize = 10) => {
   try {
-    // Usamos URLSearchParams para armar la query string limpiamente
     const params = new URLSearchParams();
-    
+/*     if (status.toLowerCase() == 'all')
+    {
+      status = 'todos';
+    }
+    else if (status.toLowerCase() == 'enabled')
+    {
+      status = 'true';
+    }
+    else (status.toLowerCase() == 'disabled')
+    {
+      status = 'false';
+    } */
+    console.log("getProducts - Parámetros:", { name, status, page, pageSize });
+    // 1. Parámetros que TU BACKEND SÍ PIDE (según el código que pasaste)
     params.append('pageNumber', page);
     params.append('pageSize', pageSize);
 
-    // Solo agregamos el nombre si el usuario escribió algo
-    if (searchTerm) {
-        params.append('name', searchTerm); 
+    // 2. Filtros (Los enviamos igual, pero tu backend actual 'GetProductsPaged' los va a ignorar 
+    // a menos que modifiques C# para que reciba 'name' y 'status' también)
+    if (name) {
+        params.append('name', name); 
     }
 
-    // Solo agregamos status si no es 'all'
-    if (status && status !== 'all') {
-        params.append('status', status === 'enabled'); // Convertimos 'enabled'/'disabled' a true/false si tu back lo pide así, o mandamos el string directo.
-        // NOTA: Si tu back espera 'true'/'false' usa la linea de arriba. 
-        // Si espera 'enabled'/'disabled', usa: params.append('status', status);
+    if (status && status !== 'todos') {
+        // Asumiendo que quieres mandar true/false. Si prefieres texto, quita la comparación.
+        params.append('status', status === 'true'); 
     }
 
-    const response = await instance.get(`/products?${params.toString()}`);
+    // 3. CAMBIO CRÍTICO: La ruta ahora es '/products/paged'
+    // Esto coincide con el [HttpGet("paged")] de tu Controller
+    const response = await instance.get(`/products/paged?${params.toString()}`);
 
     return { 
       data: {
-        productItems: response.data.items || response.data, 
-        total: response.data.totalCount || 0 
+        // Adaptamos la respuesta (C# suele devolver PascalCase: Items, TotalCount)
+        productItems: response.data.items || response.data.Items || [], 
+        total: response.data.totalCount || response.data.TotalCount || 0 
       }, 
       error: null 
     };
+
   } catch (error) {
-    console.error(error);
+    console.error("Error en getProducts:", error);
     return { data: null, error: error };
   }
 };
