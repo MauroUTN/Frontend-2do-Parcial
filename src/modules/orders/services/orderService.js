@@ -23,8 +23,21 @@ export const getOrders = async (searchTerm = '', status = '', page = 1, pageSize
       error: null 
     };
 
-  } catch (error) {
+  }
+  
+   catch (error) {
     console.error("Error obteniendo órdenes:", error);
     return { data: null, error: error.message };
+  }
+};
+export const createOrder = async (orderPayload) => {
+  try {
+    const response = await instance.post('/orders', orderPayload);
+    return { data: response.data, error: null };
+  } catch (error) {
+    console.error("Error creando orden:", error);
+    // Devolvemos el mensaje de error del backend si existe (ej: "Stock insuficiente")
+    const msg = error.response?.data?.detail || error.response?.data || "Error al procesar la orden";
+    return { data: null, error: msg };
   }
 };

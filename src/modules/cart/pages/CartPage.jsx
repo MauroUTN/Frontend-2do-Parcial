@@ -3,10 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import useCart from '../hook/useCart';
 import ProductCartClient from '../components/ProductCartClient';
 import Button from '../../shared/components/Button';
-import { instance } from '../../shared/api/axiosInstance'; 
 import Modal from '../../shared/components/Modal';
 import ClientLoginForm from '../../home/components/ClientLoginForm';
 import ClientRegisterForm from '../../home/components/ClientRegisterForm';
+
+// --- NUEVAS IMPORTACIONES ---
+import { createOrder } from '../../orders/services/orderService';
+import { getUserIdFromToken } from '../../shared/helpers/jwtHelper'; // Asegúrate de haber creado este archivo
 
 function CartPage() {
   const navigate = useNavigate();
@@ -21,56 +24,83 @@ function CartPage() {
 
   const [activeModal, setActiveModal] = useState(null); // Para login/registro
   const [isProcessing, setIsProcessing] = useState(false);
-  
-  // NUEVO ESTADO: Para el modal de borrar carrito
-  const [showClearCartModal, setShowClearCartModal] = useState(false);
+  const [showClearCartModal, setShowClearCartModal] = useState(false); // Modal vaciar carrito
 
   const hasItems = items.length > 0;
 
+  // --- LÓGICA PRINCIPAL DE CREACIÓN DE ORDEN ---
   const submitOrder = async () => {
     setIsProcessing(true);
+    
+    // 1. Validar que tengamos usuario (extraer ID del token)
+    const customerId = getUserIdFromToken();
+    
+    if (!customerId) {
+        alert("Sesión expirada o inválida. Por favor, inicie sesión nuevamente.");
+        setIsProcessing(false);
+        setActiveModal('login');
+        return;
+    }
+
     try {
+      // 2. Armar el objeto tal cual lo pide tu Backend (.NET RequestOrderModel)
       const orderData = {
-        ShippingAddress: "Dirección por defecto",
-        BillingAddress: "Dirección por defecto",
-        items: items.map(item => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          unitPrice: item.unitPrice
+        OrderDate: new Date().toISOString(),
+        ShippingAddress: "Calle Falsa 123, Tucumán", // Aquí podrías poner un input real
+        BillingAddress: "Calle Falsa 123, Tucumán",
+        Notes: "Compra realizada desde la web",
+        CustomerId: customerId, // El GUID del usuario extraído del token
+        Status: 1, // 1 = PENDING (según tu Enum OrderStatus)
+        OrderItems: items.map(item => ({
+          ProductId: item.productId || item.id, // Aseguramos enviar el GUID del producto
+          Quantity: item.quantity
         }))
       };
 
+      console.log("Enviando orden al backend:", orderData);
 
-      console.log(orderData)
-      await instance.post('/orders', orderData);
-      
-      alert("¡Compra realizada con éxito!");
-      clearCart();
-      navigate('/'); 
-    } catch (error) {
-      console.error(error);
-      const msg = error.response?.data?.detail || "Error al procesar la orden";
-      alert(msg);
+      // 3. Llamar al servicio
+      const { error } = await createOrder(orderData);
+
+      if (error) {
+        // Si hay error (ej: Stock insuficiente), lo mostramos
+        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error;
+        alert(`No se pudo procesar la orden: ${errorMessage}`);
+      } else {
+        // Éxito
+        alert("¡Compra realizada con éxito! Gracias por tu pedido.");
+        clearCart();
+        navigate('/admin/orders'); // Redirigimos a mis órdenes (o al home)
+      }
+
+    } catch (err) {
+      console.error("Error inesperado en submitOrder:", err);
+      alert("Ocurrió un error inesperado al procesar la compra.");
     } finally {
       setIsProcessing(false);
     }
   };
 
+  // Botón "Finalizar Compra"
   const handleFinalizePurchase = () => {
     const token = localStorage.getItem('token');
     if (token) {
-      submitOrder();
+      submitOrder(); // Si ya tiene token, intenta crear la orden
     } else {
-      setActiveModal('login');
+      setActiveModal('login'); // Si no, pide login
     }
   };
 
+  // Callback cuando el login es exitoso
   const handleLoginSuccess = () => {
     setActiveModal(null);
-    submitOrder(); 
+    // Esperamos un poco para asegurar que el token se guardó en localStorage
+    setTimeout(() => {
+        submitOrder();
+    }, 500);
   };
 
-  // Función para confirmar el vaciado
+  // Confirmación de vaciar carrito
   const handleConfirmClear = () => {
     clearCart();
     setShowClearCartModal(false);
@@ -79,51 +109,31 @@ function CartPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       
-      {/* --- MODALES DE LOGIN/REGISTRO --- */}
+      {/* --- MODALES --- */}
       <Modal isOpen={activeModal === 'login'} onClose={() => setActiveModal(null)} title="Inicia sesión">
         <ClientLoginForm onSuccess={handleLoginSuccess} onSwitchToRegister={() => setActiveModal('register')} />
       </Modal>
+
       <Modal isOpen={activeModal === 'register'} onClose={() => setActiveModal(null)} title="Crear cuenta">
         <ClientRegisterForm onSuccess={() => setActiveModal(null)} onSwitchToLogin={() => setActiveModal('login')} />
       </Modal>
 
-      {/* --- NUEVO MODAL: CONFIRMAR VACIAR CARRITO --- */}
-      <Modal 
-        isOpen={showClearCartModal} 
-        onClose={() => setShowClearCartModal(false)} 
-        title="¿Vaciar carrito?"
-      >
+      <Modal isOpen={showClearCartModal} onClose={() => setShowClearCartModal(false)} title="¿Vaciar carrito?">
         <div className="flex flex-col gap-4">
-          <p className="text-gray-600">
-            ¿Estás seguro de que deseas eliminar todos los productos del carrito? Esta acción no se puede deshacer.
-          </p>
+          <p className="text-gray-600">¿Estás seguro de eliminar todos los productos?</p>
           <div className="flex gap-3 mt-2 justify-end">
-            <Button 
-              variant="secondary" 
-              onClick={() => setShowClearCartModal(false)}
-              className="w-auto px-4"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              variant="default" 
-              onClick={handleConfirmClear}
-              className="w-auto px-4 bg-red-100 text-red-700 hover:bg-red-200" // Estilo rojo para acción destructiva
-            >
-              Sí, vaciar
-            </Button>
+            <Button variant="secondary" onClick={() => setShowClearCartModal(false)}>Cancelar</Button>
+            <Button variant="default" onClick={handleConfirmClear} className="bg-red-100 text-red-700 hover:bg-red-200">Sí, vaciar</Button>
           </div>
         </div>
       </Modal>
 
-
-      {/* SECCIÓN IZQUIERDA: Lista */}
+      {/* --- LISTA DE PRODUCTOS (IZQUIERDA) --- */}
       <section className="flex-1 bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
         <div className="flex justify-between items-center mb-6">
            <h1 className="text-xl font-bold text-gray-800">Carrito de compras</h1>
            {hasItems && (
              <button 
-               // CAMBIO AQUÍ: Abrimos el modal en lugar del window.confirm
                onClick={() => setShowClearCartModal(true)}
                className="text-sm text-red-500 hover:text-red-700 hover:underline font-medium transition-colors"
              >
@@ -155,7 +165,7 @@ function CartPage() {
         )}
       </section>
 
-      {/* SECCIÓN DERECHA: Resumen */}
+      {/* --- RESUMEN DE PEDIDO (DERECHA) --- */}
       <aside className="w-full lg:w-80 bg-white rounded-2xl shadow-sm p-6 h-fit border border-gray-100 sticky top-24">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Detalle de pedido</h2>
 
@@ -169,8 +179,9 @@ function CartPage() {
           <span className="text-xl font-bold text-gray-900">${total.toFixed(2)}</span>
         </div>
 
+        {/* BOTÓN FINALIZAR COMPRA */}
         <Button
-          className="w-full rounded-lg py-3 font-bold"
+          className="w-full rounded-lg py-3 font-bold bg-purple-200 text-purple-900 hover:bg-purple-300"
           variant="default"
           disabled={!hasItems || isProcessing}
           onClick={handleFinalizePurchase}

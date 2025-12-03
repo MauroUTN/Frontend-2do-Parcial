@@ -16,12 +16,14 @@ const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
     setSuccessMessage('');
 
     // Payload con Mayúsculas para que C# lo entienda bien
-    const payload = {
+   const payload = {
       Username: data.username,
       Email: data.email,
       Password: data.password,
-      Rol: 'User', // Rol de cliente
-      Name: data.username
+      Rol: 'User',
+      // Ahora enviamos los datos reales del formulario
+      Name: data.name,           
+      PhoneNumber: data.phoneNumber 
     };
 
     const { error } = await registerUser(payload);
@@ -41,12 +43,27 @@ const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
     }
   };
 
-  return (
+   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
+
       <Input
         label="Usuario"
         error={errors.username?.message}
         {...register("username", { required: "Requerido" })}
+      />
+
+      <Input
+        label="Nombre Completo"
+        placeholder="Juan Pérez"
+        error={errors.name?.message}
+        {...register("name", { required: "El nombre es requerido" })}
+      />
+
+      <Input
+        label="Teléfono"
+        placeholder="+54 9 11 ..."
+        error={errors.phoneNumber?.message}
+        {...register("phoneNumber", { required: "El teléfono es requerido" })}
       />
       <Input
         label="Email"

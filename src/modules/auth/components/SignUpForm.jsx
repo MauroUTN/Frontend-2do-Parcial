@@ -23,15 +23,14 @@ function SignUpForm() {
     setBackendError('');
     
     // --- CORRECCIÓN CRÍTICA ---
-    const payload = {
+   const payload = {
       Username: data.username,
       Email: data.email,
       Password: data.password,
-      
-      // EL BACKEND PIDE "Rol", NO "role" NI "Role"
-      Rol: data.role, 
-      
-      Name: data.username 
+      Rol: data.role,
+      // Mapeamos los nuevos campos
+      Name: data.name,
+      PhoneNumber: data.phoneNumber
     };
 
     console.log("Enviando:", payload); // Para verificar en consola
@@ -47,16 +46,32 @@ function SignUpForm() {
     }
   };
 
-  return (
+ return (
     <Card className="w-full max-w-[450px] p-8 shadow-lg bg-white rounded-xl">
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         
-        {/* Usuario */}
+        {/* Usuario (Existente) */}
         <Input
           label="Usuario"
           placeholder="Nombre de usuario"
           error={errors.username?.message}
           {...register("username", { required: "El usuario es requerido" })}
+        />
+
+        {/* NUEVO: Nombre */}
+        <Input
+          label="Nombre Real"
+          placeholder="Nombre y Apellido"
+          error={errors.name?.message}
+          {...register("name", { required: "El nombre es requerido" })}
+        />
+
+        {/* NUEVO: Teléfono */}
+        <Input
+          label="Teléfono"
+          placeholder="Número de contacto"
+          error={errors.phoneNumber?.message}
+          {...register("phoneNumber", { required: "El teléfono es requerido" })}
         />
 
         {/* Email */}
