@@ -31,8 +31,8 @@ function CartPage() {
     setIsProcessing(true);
     try {
       const orderData = {
-        shippingAddress: "Dirección por defecto",
-        billingAddress: "Dirección por defecto",
+        ShippingAddress: "Dirección por defecto",
+        BillingAddress: "Dirección por defecto",
         items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -40,6 +40,8 @@ function CartPage() {
         }))
       };
 
+
+      console.log(orderData)
       await instance.post('/orders', orderData);
       
       alert("¡Compra realizada con éxito!");

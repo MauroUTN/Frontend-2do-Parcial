@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
 import { useOrders } from '../hook/useOrders';
 
-// Asegúrate de que estos valores coincidan EXACTAMENTE con lo que devuelve tu Backend (C#)
 const orderStatus = {
   ALL: 'all',
   PENDING: 'Pending',
@@ -23,6 +23,16 @@ function ListOrdersPage() {
     confirmSearch
   } = useOrders();
 
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
+
+  const toggleDetails = (id) => {
+    if (expandedOrderId === id) {
+      setExpandedOrderId(null);
+    } else {
+      setExpandedOrderId(id);
+    }
+  };
+
   const totalPages = total || 1;
 
   return (
@@ -30,8 +40,6 @@ function ListOrdersPage() {
       <Card>
         <div className='flex justify-between items-center mb-3'>
           <h1 className='text-3xl'>Órdenes</h1>
-
-          {/* FIX: refreshOrders NO EXISTE */}
           <Button onClick={confirmSearch} className='hidden sm:block'>
             Refrescar
           </Button>
@@ -51,8 +59,6 @@ function ListOrdersPage() {
               placeholder='Buscar por ID...' 
               className='text-[1.3rem] w-full border p-1 rounded' 
             />
-
-            {/* Botón de buscar (faltaba) */}
             <Button onClick={confirmSearch}>
               Buscar
             </Button>
@@ -99,8 +105,22 @@ function ListOrdersPage() {
                     Total: ${order.totalAmount || order.total || 0}
                   </span>
                 </div>
-                <Button variant="secondary">Ver</Button>
+                <Button variant="secondary" onClick={() => toggleDetails(order.id)}>
+                    {expandedOrderId === order.id ? 'Ocultar' : 'Ver'}
+                </Button>
               </div>
+
+              {expandedOrderId === order.id && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
+                        <p><strong>Customer ID:</strong> {order.customerId}</p>
+                        <p><strong>Fecha:</strong> {new Date(order.orderDate).toLocaleString()}</p>
+                        <p><strong>Dirección Envío:</strong> {order.shippingAddress}</p>
+                        <p><strong>Dirección Facturación:</strong> {order.billingAddress}</p>
+                        <p className="md:col-span-2"><strong>Notas:</strong> {order.notes}</p>
+                    </div>
+                </div>
+              )}
             </Card>
           ))
         )}
