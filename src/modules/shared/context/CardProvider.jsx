@@ -6,49 +6,74 @@ export function CardProvider({ children }) {
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
 
-  // Cargar del LocalStorage al inicio
+  // --- FUNCIÓN MAESTRA PARA OBTENER ID ---
+  // Esto arregla el problema de que a veces venga como 'id', 'Id' o 'productId'
+  const getId = (product) => product.id || product.Id || product.productId;
+
+  // 1. Cargar del LocalStorage con seguridad (try/catch)
   useEffect(() => {
     const stored = localStorage.getItem('cart');
-    if (stored) setItems(JSON.parse(stored));
+    if (stored) {
+        try {
+            setItems(JSON.parse(stored));
+        } catch (error) {
+            console.error("El carrito estaba corrupto, se reinició.");
+            localStorage.removeItem('cart');
+            setItems([]);
+        }
+    }
   }, []);
 
-  // Guardar en LocalStorage y Calcular Total
+  // 2. Guardar y Calcular Total
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
     
-    // CAMBIO: Usamos 'currentUnitPrice' porque así viene del Backend
     const newTotal = items.reduce((acc, item) => {
-        const price = item.currentUnitPrice || 0; // Protección por si viene null
-        return acc + (price * item.quantity);
+        // Buscamos el precio con varios nombres por seguridad
+        const price = item.unitPrice || item.unitPrice || item.price || 0;
+        return acc + (Number(price) * item.quantity);
     }, 0);
     
     setTotal(newTotal);
   }, [items]);
 
+  // --- FUNCIONES DEL CARRITO ---
+
   const addItem = (product, quantity = 1) => {
+    const targetId = getId(product);
+    
+    if (!targetId) {
+        console.error("Producto sin ID válido:", product);
+        return;
+    }
+
     setItems(prev => {
-      // CAMBIO: Usamos 'id' en lugar de 'productId'
-      const existing = prev.find(x => x.id === product.id);
+      // Buscamos si ya existe usando la función segura
+      const existing = prev.find(x => getId(x) === targetId);
       
       if (existing) {
-        // Si ya existe, sumamos la cantidad
         return prev.map(x => 
-            x.id === product.id 
+            getId(x) === targetId 
             ? { ...x, quantity: x.quantity + quantity } 
             : x
         );
       }
-      // Si es nuevo, lo agregamos
-      return [...prev, { ...product, quantity }];
+      // Al guardar, normalizamos el ID para que siempre tenga la propiedad 'id'
+      return [...prev, { ...product, id: targetId, quantity }];
     });
   };
 
   const updateQuantity = (id, q) => {
-    if (q < 1) return removeItem(id);
-    setItems(prev => prev.map(x => x.id === id ? { ...x, quantity: q } : x));
+    if (q < 1) {
+        removeItem(id);
+        return;
+    }
+    setItems(prev => prev.map(x => getId(x) === id ? { ...x, quantity: q } : x));
   };
 
-  const removeItem = (id) => setItems(prev => prev.filter(x => x.id !== id));
+  const removeItem = (id) => {
+    setItems(prev => prev.filter(x => getId(x) !== id));
+  };
   
   const clearCart = () => setItems([]);
 

@@ -1,19 +1,6 @@
 import { useEffect, useState } from 'react';
 import useProducts from '../../products/hook/useProducts'; 
 import ProductCardClient from '../components/ProductCardClient'; 
-
-// Importa el Layout SOLO si lo necesitas para algo local, 
-// pero recuerda que CatalogPage ya se renderiza DENTRO de ClientLayout en el Router.
-// Aquí solo necesitamos la lógica de la grilla.
-
-// IMPORTANTE: Como CatalogPage está dentro de ClientLayout, los modales ya están en el Layout.
-// PERO, para controlar los modales DESDE AQUÍ (hijo) hacia el Layout (padre), lo ideal sería usar un Contexto de UI.
-// SIN EMBARGO, para hacerlo rápido y simple sin crear más contextos, podemos Mover la lógica de modales aquí también o usar una prop.
-
-// PLAN B (Más rápido): Copiar la lógica de modales aquí solo para esta acción, 
-// o asumir que ClientLayout maneja el navbar y aquí manejamos el "Agregar".
-
-// Vamos a usar la opción de tener los modales aquí también para el flujo de "Agregar al carrito".
 import Modal from '../../shared/components/Modal';
 import ClientLoginForm from '../components/ClientLoginForm';
 import ClientRegisterForm from '../components/ClientRegisterForm';
@@ -26,7 +13,7 @@ function CatalogPage() {
   const [activeModal, setActiveModal] = useState(null);
 
   useEffect(() => {
-    setStatus('enabled'); 
+    setStatus('true');
   }, []);
 
   const closeModal = () => setActiveModal(null);

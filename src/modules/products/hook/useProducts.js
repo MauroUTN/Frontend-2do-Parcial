@@ -11,7 +11,7 @@ const useProducts = () => {
   const [appliedSearch, setAppliedSearch] = useState(''); // Lo que realmente se busca al dar click
   const [status, setStatus] = useState('todos');
   const [pageNumber, setPageNumber] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(100);
 
   const loadProducts = async () => {
     setLoading(true);

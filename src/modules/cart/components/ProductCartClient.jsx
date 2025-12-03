@@ -50,7 +50,7 @@ function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
         {/* Botón Borrar */}
         <Button 
           variant="secondary"
-          className="bg-purple-100 text-gray-600hover:bg-purple-200 border-none text-sm px-4 py-1.5"
+          className="bg-purple-100 text-gray-600 hover:bg-purple-200 border-none text-sm px-4 py-1.5"
           onClick={() => onRemove(item.productId)} // Usamos productId
         >
           Borrar

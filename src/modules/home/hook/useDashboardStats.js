@@ -19,7 +19,7 @@ const useDashboardStats = () => {
         // Hacemos las dos peticiones en paralelo.
         // Pedimos pageSize: 1 porque solo nos interesa el dato 'total' del backend, no la lista entera.
         const [productsRes, ordersRes] = await Promise.all([
-          getProducts('', 'all', 1, 1), // Search vacío, status all, pág 1, tamaño 1
+          getProducts('', 'todos', 1, 1), // Search vacío, status all, pág 1, tamaño 1
           getOrders('', 'all', 1, 1)
         ]);
 

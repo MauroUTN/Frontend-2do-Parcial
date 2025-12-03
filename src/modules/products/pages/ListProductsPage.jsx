@@ -73,7 +73,7 @@ function ListProductsPage() {
                   <div className="text-right">
                     <p className="font-bold">${product.currentUnitPrice}</p>
                     <span className={`text-xs px-2 py-1 rounded ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                        {product.isActive ? 'Activo' : 'Inactivo'}
+                        {product.isActive ? 'Habilitado' : 'Inhabilitado'}
                     </span>
                   </div>
               </div>

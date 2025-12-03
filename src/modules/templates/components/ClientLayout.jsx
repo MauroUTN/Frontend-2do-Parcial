@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'; 
-
 import Button from '../../shared/components/Button';
 import Input from '../../shared/components/Input';
 import Modal from '../../shared/components/Modal';

@@ -4,8 +4,6 @@ import useCart from '../hook/useCart';
 import ProductCartClient from '../components/ProductCartClient';
 import Button from '../../shared/components/Button';
 import { instance } from '../../shared/api/axiosInstance'; 
-
-// Imports de Modales
 import Modal from '../../shared/components/Modal';
 import ClientLoginForm from '../../home/components/ClientLoginForm';
 import ClientRegisterForm from '../../home/components/ClientRegisterForm';
@@ -162,11 +160,6 @@ function CartPage() {
         <div className="flex justify-between mb-2 text-sm text-gray-600">
           <span>Cantidad de productos</span>
           <span className="font-medium">{items.reduce((acc, x) => acc + x.quantity, 0)}</span>
-        </div>
-
-        <div className="flex justify-between mb-6 text-sm text-gray-600">
-          <span>Sub Total</span>
-          <span className="font-medium">${total.toFixed(2)}</span>
         </div>
 
         <div className="border-t border-gray-200 pt-4 flex justify-between items-center mb-6">
