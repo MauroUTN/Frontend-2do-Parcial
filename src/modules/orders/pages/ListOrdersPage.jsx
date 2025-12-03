@@ -21,7 +21,7 @@ function ListOrdersPage() {
     refreshOrders
   } = useOrders();
 
-  const totalPages = Math.ceil(total / pageSize) || 1;
+  const totalPages = total || 1;
 
   return (
     <div>
@@ -35,12 +35,12 @@ function ListOrdersPage() {
 
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='flex items-center gap-3 w-full'>
-            <input 
-              onChange={(evt) => setSearchTerm(evt.target.value)} 
-              type="text" 
-              placeholder='Buscar cliente...' 
-              className='text-[1.3rem] w-full border p-1 rounded' 
-            />
+           <input 
+            onChange={(evt) => setSearchTerm(evt.target.value)} 
+            type="text" 
+            placeholder='Buscar por ID...' 
+            className='text-[1.3rem] w-full border p-1 rounded' 
+          />
           </div>
           <select 
             onChange={evt => setStatus(evt.target.value)} 
@@ -99,7 +99,7 @@ function ListOrdersPage() {
         >
           Atrás
         </button>
-        <span>{pageNumber} / {totalPages}</span>
+        <span>Página {pageNumber} de {totalPages || 1}</span>
         <button
           disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}
@@ -107,6 +107,17 @@ function ListOrdersPage() {
         >
           Siguiente
         </button>
+         <select
+          value={pageSize}
+          onChange={(e) => {
+            setPageSize(Number(e.target.value));
+          }}
+          className='border p-1 rounded'
+        >
+          <option value="5">5</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+        </select>
       </div>
     </div>
   );

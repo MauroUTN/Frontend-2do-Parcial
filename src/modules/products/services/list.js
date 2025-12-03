@@ -3,18 +3,7 @@ import { instance } from '../../shared/api/axiosInstance';
 export const getProducts = async (name = '', status = 'todos', page = 1, pageSize) => {
   try {
     const params = new URLSearchParams();
-/*     if (status.toLowerCase() == 'all')
-    {
-      status = 'todos';
-    }
-    else if (status.toLowerCase() == 'enabled')
-    {
-      status = 'true';
-    }
-    else (status.toLowerCase() == 'disabled')
-    {
-      status = 'false';
-    } */
+
     console.log("getProducts - Parámetros:", { name, status, page, pageSize });
     // 1. Parámetros que TU BACKEND SÍ PIDE (según el código que pasaste)
     params.append('pageNumber', page);
