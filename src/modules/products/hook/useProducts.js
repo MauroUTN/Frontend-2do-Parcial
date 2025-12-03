@@ -6,9 +6,9 @@ const useProducts = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // Estados para los filtros
-  const [searchTerm, setSearchTerm] = useState(''); // Lo que escribes en el input
-  const [appliedSearch, setAppliedSearch] = useState(''); // Lo que realmente se busca al dar click
+  const [searchTerm, setSearchTerm] = useState('');
+  const [appliedSearch, setAppliedSearch] = useState(''); // ejecuta búsqueda solo con enter/botón
+
   const [status, setStatus] = useState('todos');
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(100);
@@ -16,9 +16,8 @@ const useProducts = () => {
   const loadProducts = async () => {
     setLoading(true);
     try {
-      // Usamos 'appliedSearch' (lo confirmado) en lugar de 'searchTerm' (lo que se está escribiendo)
       const { data } = await getProducts(appliedSearch, status, pageNumber, pageSize);
-      console.log("Datos recibidos en useProducts:", data);
+
       if (data) {
         setProducts(data.productItems || []);
         setTotal(data.total || 0);
@@ -30,30 +29,35 @@ const useProducts = () => {
     }
   };
 
-  // 1. Recargar cuando cambie Página, Tamaño o Estado (Filtro)
   useEffect(() => {
     loadProducts();
-  }, [pageNumber, pageSize, status, appliedSearch]); 
+  }, [appliedSearch, status, pageNumber, pageSize]);
 
-  // Función para el botón "Buscar"
+  // 🔥 ENTER o botón actualizan appliedSearch
   const handleSearch = () => {
-    setPageNumber(1); // Reseteamos a la página 1 al buscar
-    setAppliedSearch(searchTerm); // Confirmamos el término de búsqueda
+    setPageNumber(1);
+    setAppliedSearch(searchTerm);
   };
 
-  // Función para manejar cambio de página
-  const handlePageChange = (newPage) => {
-    setPageNumber(newPage);
+  const onChangeBusqueda = (e) => {
+    if(e.target.value === ""){
+       handleSearch();
+    }
+    setSearchTerm(e.target.value);
   };
 
   return {
-    products, total, loading,
-    searchTerm, setSearchTerm,
-    status, setStatus,
-    pageNumber, pageSize, setPageSize,
+    products,
+    total,
+    loading,
+    searchTerm,
+    appliedSearch,
+    setStatus,
+    onChangeBusqueda,
     handleSearch,
-    handlePageChange,
-    totalPages: total,
+    pageNumber,
+    pageSize,
+    setPageSize,
     productStatus: { ALL: 'todos', ENABLED: 'true', DISABLED: 'false' }
   };
 };

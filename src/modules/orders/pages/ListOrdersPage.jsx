@@ -16,9 +16,11 @@ function ListOrdersPage() {
   const { 
     orders, loading, total, 
     pageNumber, setPageNumber, 
-    pageSize, setPageSize,
-    setSearchTerm, setStatus,
-    refreshOrders
+    pageSize, setPageSize, 
+    status, setStatus,
+    searchTerm,
+    handleInputChange,
+    confirmSearch
   } = useOrders();
 
   const totalPages = total || 1;
@@ -28,20 +30,34 @@ function ListOrdersPage() {
       <Card>
         <div className='flex justify-between items-center mb-3'>
           <h1 className='text-3xl'>Órdenes</h1>
-          <Button onClick={refreshOrders} className='hidden sm:block'>
+
+          {/* FIX: refreshOrders NO EXISTE */}
+          <Button onClick={confirmSearch} className='hidden sm:block'>
             Refrescar
           </Button>
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
           <div className='flex items-center gap-3 w-full'>
-           <input 
-            onChange={(evt) => setSearchTerm(evt.target.value)} 
-            type="text" 
-            placeholder='Buscar por ID...' 
-            className='text-[1.3rem] w-full border p-1 rounded' 
-          />
+            <input 
+              value={searchTerm}
+              onChange={handleInputChange}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  confirmSearch();
+                }
+              }}
+              type="text" 
+              placeholder='Buscar por ID...' 
+              className='text-[1.3rem] w-full border p-1 rounded' 
+            />
+
+            {/* Botón de buscar (faltaba) */}
+            <Button onClick={confirmSearch}>
+              Buscar
+            </Button>
           </div>
+
           <select 
             onChange={evt => setStatus(evt.target.value)} 
             className='text-[1.3rem] border p-1 rounded bg-white'
@@ -66,7 +82,6 @@ function ListOrdersPage() {
             <Card key={order.id}>
               <div className="flex justify-between items-center">
                 <div>
-                  {/* Intenta mostrar el nombre, si no existe muestra "Cliente" */}
                   <h2 className="font-bold text-xl">
                     #{order.id} - {order.customerName || order.clientName || "Cliente"}
                   </h2>
@@ -79,7 +94,7 @@ function ListOrdersPage() {
                   }`}>
                     {order.status}
                   </span>
-                  {/* Muestra el total si existe */}
+
                   <span className="ml-3 text-gray-500">
                     Total: ${order.totalAmount || order.total || 0}
                   </span>
@@ -99,7 +114,9 @@ function ListOrdersPage() {
         >
           Atrás
         </button>
-        <span>Página {pageNumber} de {totalPages || 1}</span>
+
+        <span>Página {pageNumber} de {totalPages}</span>
+
         <button
           disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}
@@ -107,11 +124,10 @@ function ListOrdersPage() {
         >
           Siguiente
         </button>
-         <select
+
+        <select
           value={pageSize}
-          onChange={(e) => {
-            setPageSize(Number(e.target.value));
-          }}
+          onChange={(e) => setPageSize(Number(e.target.value))}
           className='border p-1 rounded'
         >
           <option value="5">5</option>

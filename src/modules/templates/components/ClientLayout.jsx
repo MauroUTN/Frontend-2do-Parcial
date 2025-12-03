@@ -123,11 +123,6 @@ const ClientLayout = () => {
           </nav>
         </div>
 
-        {/* CENTRO */}
-        <div className="w-[500px] flex justify-center">
-           <Input placeholder="Buscar productos..." className="bg-white border-gray-300" />
-        </div>
-
         {/* DERECHA */}
         <div className="flex-1 flex items-center justify-end gap-3 h-full">
           {isLogged ? (
