@@ -1,11 +1,11 @@
-export const listOrders = async (searchTerm = "", status = "all", pageNumber = 1, pageSize = 20) => {
+export const listOrders = async (orderID = "", status = "all", pageNumber = 1, pageSize = 20) => {
   try {
     const params = new URLSearchParams();
 
     params.append("pageNumber", pageNumber);
     params.append("pageSize", pageSize);
 
-    if (searchTerm) params.append("search", searchTerm);
+    if (orderID) params.append("orderID", orderID);
     if (status !== "all") params.append("status", status);
 
     const response = await fetch(`/api/orders/paged?${params.toString()}`, {
