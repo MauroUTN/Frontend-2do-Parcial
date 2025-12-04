@@ -137,7 +137,6 @@ function CartPage() {
       {/* --- SECCIÓN PRINCIPAL (LISTA) --- */}
       <section className="flex-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
         
-        {/* Header Carrito (Sin botón volver) */}
         <div className="flex flex-row justify-between items-center mb-4 gap-2">
            <h1 className="text-xl font-bold text-gray-800">Carrito</h1>
            
@@ -180,7 +179,7 @@ function CartPage() {
         </div>
         <div className="border-t border-gray-200 pt-3 flex justify-between items-center mb-6">
           <span className="text-lg font-bold text-gray-900">Total</span>
-          <span className="text-xl font-bold text-purple-400">${total.toFixed(2)}</span>
+          <span className="text-xl font-bold text-black">${total.toFixed(2)}</span>
         </div>
         <Button 
             className="w-full py-3 text-base font-bold shadow-md shadow-purple-100" 

@@ -51,7 +51,7 @@ function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
 
         <Button 
           variant="secondary"
-          className="bg-purple-50 text-purple-400 hover:bg-purple-100 border-none text-xs sm:text-sm px-3 py-1.5 h-8 sm:h-auto"
+          className="bg-purple-50 text-purple-400 hover:bg-purple-200 border-none text-xs sm:text-sm px-3 py-1.5 h-8 sm:h-auto"
           onClick={() => onRemove(item.productId)} 
         >
           Borrar
