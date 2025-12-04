@@ -109,7 +109,7 @@ function CartPage() {
                     variant="default" 
                     onClick={submitOrder} 
                     disabled={isProcessing} 
-                    className="flex-1 py-2 text-base bg-purple-200 text-purple-800 hover:bg-purple-300 font-bold"
+                    className="flex-1 py-2 text-base bg-purple-200 text-purple-400 hover:bg-purple-300 font-bold"
                 >
                     {isProcessing ? '...' : 'Confirmar'}
                 </Button>
@@ -144,7 +144,7 @@ function CartPage() {
            {hasItems && (
              <button 
                 onClick={() => setShowClearCartModal(true)} 
-                className="text-red-500 text-sm font-medium hover:underline"
+                className="text-red-400 text-sm font-medium hover:underline"
              >
                 Vaciar carrito
              </button>
@@ -180,7 +180,7 @@ function CartPage() {
         </div>
         <div className="border-t border-gray-200 pt-3 flex justify-between items-center mb-6">
           <span className="text-lg font-bold text-gray-900">Total</span>
-          <span className="text-xl font-bold text-purple-700">${total.toFixed(2)}</span>
+          <span className="text-xl font-bold text-purple-400">${total.toFixed(2)}</span>
         </div>
         <Button 
             className="w-full py-3 text-base font-bold shadow-md shadow-purple-100" 

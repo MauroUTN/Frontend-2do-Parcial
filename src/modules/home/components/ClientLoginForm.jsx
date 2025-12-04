@@ -55,7 +55,7 @@ const ClientLoginForm = ({ onSuccess, onSwitchToRegister }) => {
       )}
 
       <div className="mt-2 flex flex-col gap-3">
-        <Button type="submit" variant="default" className="w-full py-2 text-base font-semibold bg-purple-200 text-purple-800 hover:bg-purple-300">
+        <Button type="submit" variant="default" className="w-full py-2 text-base font-semibold bg-purple-200 text-purple-400 hover:bg-purple-300">
           Iniciar Sesión
         </Button>
         
@@ -65,7 +65,7 @@ const ClientLoginForm = ({ onSuccess, onSwitchToRegister }) => {
                 <button 
                     type="button" 
                     onClick={onSwitchToRegister}
-                    className="text-purple-600 font-bold text-sm hover:underline ml-1"
+                    className="text-purple-300 font-bold text-sm hover:underline ml-1"
                 >
                     Registrarse
                 </button>

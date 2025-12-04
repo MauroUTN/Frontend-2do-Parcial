@@ -23,7 +23,7 @@ function ListOrdersPage() {
     <div className="max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
           <h1 className='text-2xl sm:text-3xl font-bold text-gray-800'>Órdenes</h1>
-          <button onClick={confirmSearch} className="sm:hidden text-purple-600 font-medium text-sm">Refrescar</button>
+          <button onClick={confirmSearch} className="sm:hidden text-purple-300 font-medium text-sm">Refrescar</button>
       </div>
 
       <Card className="mb-6 p-4 shadow-sm border border-gray-200">

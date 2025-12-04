@@ -52,7 +52,7 @@ const ClientLayout = () => {
   const getNavLinkClass = (path) => {
     const isActive = location.pathname === path;
     return `cursor-pointer px-4 py-2 font-medium transition-all duration-200 rounded-lg flex items-center gap-2
-      ${isActive ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`;
+      ${isActive ? 'bg-purple-100 text-purple-400' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`;
   };
 
   return (
@@ -85,7 +85,7 @@ const ClientLayout = () => {
                     <span className={getNavLinkClass('/cart')} onClick={() => handleNavigation('/cart')}>
                         Carrito
                         {totalItems > 0 && (
-                            <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-purple-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                                 {totalItems}
                             </span>
                         )}
@@ -161,14 +161,14 @@ const ClientLayout = () => {
 
             <nav className="flex flex-col gap-2">
                 <span 
-                    className={`text-lg font-medium p-3 rounded-xl flex justify-between items-center ${location.pathname === '/' ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                    className={`text-lg font-medium p-3 rounded-xl flex justify-between items-center ${location.pathname === '/' ? 'bg-purple-50 text-purple-400' : 'text-gray-700 hover:bg-gray-50'}`}
                     onClick={() => handleNavigation('/')}
                 >
                     Productos
                     <svg className="w-5 h-5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                 </span>
                 <span 
-                    className={`text-lg font-medium p-3 rounded-xl flex justify-between items-center ${location.pathname === '/cart' ? 'bg-purple-50 text-purple-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                    className={`text-lg font-medium p-3 rounded-xl flex justify-between items-center ${location.pathname === '/cart' ? 'bg-purple-50 text-purple-400' : 'text-gray-700 hover:bg-gray-50'}`}
                     onClick={() => handleNavigation('/cart')}
                 >
                     <span className="flex items-center gap-2">

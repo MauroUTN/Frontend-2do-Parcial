@@ -98,7 +98,7 @@ const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
         {onSwitchToLogin && (
             <p className="text-center text-sm text-gray-500">
             ¿Ya tienes cuenta?{' '}
-            <button type="button" onClick={onSwitchToLogin} className="text-purple-600 font-bold hover:underline">
+            <button type="button" onClick={onSwitchToLogin} className="text-purple-300 font-bold hover:underline">
                 Inicia Sesión
             </button>
             </p>

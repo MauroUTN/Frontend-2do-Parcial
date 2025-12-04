@@ -19,7 +19,7 @@ function Dashboard() {
 
   const getLinkStyles = ({ isActive }) => (
     `pl-4 w-full block py-3 rounded-lg transition duration-200 text-sm font-medium mb-1
-    ${isActive ? 'bg-purple-100 text-purple-700' : 'text-gray-600 hover:bg-gray-50'}`
+    ${isActive ? 'bg-purple-100 text-purple-400' : 'text-gray-600 hover:bg-gray-50'}`
   );
 
   return (
