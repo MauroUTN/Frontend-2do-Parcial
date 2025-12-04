@@ -123,11 +123,48 @@ function ListOrdersPage() {
         )}
       </div>
       
-      <div className='flex justify-center items-center mt-8 gap-3 text-sm'>
-        <button disabled={pageNumber === 1} onClick={() => setPageNumber(pageNumber - 1)} className='bg-white border px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-gray-50'>Anterior</button>
-        <span className="px-2 text-gray-600 font-medium">{pageNumber} / {totalPages}</span>
-        <button disabled={pageNumber >= totalPages} onClick={() => setPageNumber(pageNumber + 1)} className='bg-white border px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-gray-50'>Siguiente</button>
-      </div>
+      <div className='flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 border-t border-gray-200 pt-4'>
+  
+  {/* Botones de navegación (Izquierda) */}
+  <div className="flex items-center gap-3">
+    <button 
+      disabled={pageNumber === 1} 
+      onClick={() => setPageNumber(pageNumber - 1)} 
+      className='px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-medium'
+    >
+      Anterior
+    </button>
+    
+    <span className="text-sm text-gray-600 font-semibold px-2">
+      Pág {pageNumber} de {totalPages || 1}
+    </span>
+    
+    <button 
+      disabled={pageNumber >= totalPages} 
+      onClick={() => setPageNumber(pageNumber + 1)} 
+      className='px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-medium'
+    >
+      Siguiente
+    </button>
+  </div>
+
+  {/* Selector de filas (Derecha) */}
+  <div className="flex items-center">
+    <select
+      value={pageSize}
+      onChange={(e) => { 
+        setPageSize(Number(e.target.value)); 
+        setPageNumber(1); // Resetear a página 1 al cambiar tamaño
+      }}
+      className='cursor-pointer bg-white border border-gray-300 text-gray-600 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-200 shadow-sm hover:border-gray-400 transition-colors'
+    >
+      <option value="5">5 filas</option>
+      <option value="10">10 filas</option>
+      <option value="20">20 filas</option>
+      <option value="50">50 filas</option>
+    </select>
+  </div>
+</div>
     </div>
   );
 }

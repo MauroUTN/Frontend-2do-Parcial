@@ -7,12 +7,21 @@ import SearchBar from '../../shared/components/SearchBar';
 
 function ListProductsPage() {
   const navigate = useNavigate();
+  
+  // 1. Desestructuración corregida: Quitamos handlePageChange y usamos setPageNumber
   const {
-    products, loading, totalPages,
-    searchTerm, setSearchTerm,
-    status, setStatus,
-    pageNumber, pageSize, setPageSize,
-    handleSearch, handlePageChange,
+    products, 
+    loading, 
+    totalPages,
+    searchTerm, 
+    setSearchTerm,
+    status, 
+    setStatus,
+    pageNumber, 
+    setPageNumber, // <--- Usamos esto para cambiar de página
+    pageSize, 
+    setPageSize,
+    handleSearch,
     productStatus,
     setSearchSku 
   } = useProducts();
@@ -46,7 +55,10 @@ function ListProductsPage() {
                 </div>
                 <select
                     value={status}
-                    onChange={(e) => { setStatus(e.target.value); handlePageChange(1); }}
+                    onChange={(e) => { 
+                      setStatus(e.target.value); 
+                      setPageNumber(1); // Reset a pág 1 al filtrar
+                    }}
                     className='h-10 border border-gray-200 rounded-lg bg-gray-50 text-sm px-3 outline-none focus:ring-2 focus:ring-purple-200 w-full sm:w-48 text-gray-700'
                 >
                     <option value={productStatus.ALL}>Todos</option>
@@ -79,7 +91,6 @@ function ListProductsPage() {
                     <p className="text-sm text-gray-500">Stock: <span className="font-medium text-gray-800">{product.stockQuantity}</span></p>
                 </div>
                 
-                {/* BOTÓN ELIMINADO A PEDIDO DEL USUARIO */}
                 <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-none pt-3 sm:pt-0 border-gray-100 mt-1 sm:mt-0">
                     <span className="font-bold text-lg text-gray-900">${product.currentUnitPrice}</span>
                 </div>
@@ -88,21 +99,48 @@ function ListProductsPage() {
         )}
       </div>
 
-      <div className='flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 text-sm text-gray-600'>
-        <div className="flex gap-2">
-            <button disabled={pageNumber === 1} onClick={() => handlePageChange(pageNumber - 1)} className='bg-white border px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-gray-50'>Anterior</button>
-            <span className="flex items-center px-2 font-medium">Pág {pageNumber} de {totalPages || 1}</span>
-            <button disabled={pageNumber >= totalPages} onClick={() => handlePageChange(pageNumber + 1)} className='bg-white border px-3 py-1.5 rounded-lg disabled:opacity-50 hover:bg-gray-50'>Siguiente</button>
+      {/* --- PAGINACIÓN CORREGIDA Y CON NUEVO ESTILO --- */}
+      <div className='flex flex-col sm:flex-row justify-between items-center mt-8 gap-4 border-t border-gray-200 pt-4'>
+        
+        {/* Botones (Izquierda) */}
+        <div className="flex items-center gap-3">
+            <button 
+              disabled={pageNumber === 1} 
+              onClick={() => setPageNumber(pageNumber - 1)} 
+              className='px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-medium'
+            >
+              Anterior
+            </button>
+            
+            <span className="text-sm text-gray-600 font-semibold px-2">
+              Pág {pageNumber} de {totalPages || 1}
+            </span>
+            
+            <button 
+              disabled={pageNumber >= totalPages} 
+              onClick={() => setPageNumber(pageNumber + 1)} 
+              className='px-4 py-2 bg-white border border-gray-300 text-gray-600 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm font-medium'
+            >
+              Siguiente
+            </button>
         </div>
-        <select
-          value={pageSize}
-          onChange={(e) => { setPageSize(Number(e.target.value)); handlePageChange(1); }}
-          className='border border-gray-300 py-1.5 px-3 rounded-lg bg-white outline-none w-full sm:w-auto text-center'
-        >
-          <option value="5">5 filas</option>
-          <option value="10">10 filas</option>
-          <option value="20">20 filas</option>
-        </select>
+
+        {/* Selector (Derecha) */}
+        <div className="flex items-center">
+            <select
+              value={pageSize}
+              onChange={(e) => { 
+                setPageSize(Number(e.target.value)); 
+                setPageNumber(1); 
+              }}
+              className='cursor-pointer bg-white border border-gray-300 text-gray-600 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-200 shadow-sm hover:border-gray-400 transition-colors'
+            >
+              <option value="5">5 filas</option>
+              <option value="10">10 filas</option>
+              <option value="20">20 filas</option>
+              <option value="50">50 filas</option>
+            </select>
+        </div>
       </div>
     </div>
   );
