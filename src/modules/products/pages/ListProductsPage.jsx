@@ -8,7 +8,7 @@ import SearchBar from '../../shared/components/SearchBar';
 function ListProductsPage() {
   const navigate = useNavigate();
   
-  // 1. Desestructuración corregida: Quitamos handlePageChange y usamos setPageNumber
+ 
   const {
     products, 
     loading, 
@@ -18,7 +18,7 @@ function ListProductsPage() {
     status, 
     setStatus,
     pageNumber, 
-    setPageNumber, // <--- Usamos esto para cambiar de página
+    setPageNumber, 
     pageSize, 
     setPageSize,
     handleSearch,
@@ -57,7 +57,7 @@ function ListProductsPage() {
                     value={status}
                     onChange={(e) => { 
                       setStatus(e.target.value); 
-                      setPageNumber(1); // Reset a pág 1 al filtrar
+                      setPageNumber(1); 
                     }}
                     className='h-10 border border-gray-200 rounded-lg bg-gray-50 text-sm px-3 outline-none focus:ring-2 focus:ring-purple-200 w-full sm:w-48 text-gray-700'
                 >

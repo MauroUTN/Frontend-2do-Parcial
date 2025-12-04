@@ -1,5 +1,4 @@
 import { useContext } from 'react';
-// Asumimos que crearás este contexto
 import { CardContext } from '../context/CardProvider'; 
 
 const useCard = () => {
@@ -10,10 +9,10 @@ const useCard = () => {
   }
 
   return {
-    items: context.items,             // Items dentro de la card/carrito
-    total: context.total,             // Precio total o estado
-    addItem: context.addItem,         // Función para agregar
-    removeItem: context.removeItem,   // Función para quitar
+    items: context.items,             
+    total: context.total,             
+    addItem: context.addItem,         
+    removeItem: context.removeItem,   
   };
 };
 

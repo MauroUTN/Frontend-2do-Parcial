@@ -12,10 +12,7 @@ function Modal({ isOpen, onClose, title, children }) {
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       
-      {/* w-[95%] -> En móvil ocupa casi todo el ancho.
-         max-w-md -> Tope de ancho para que no se estire en PC.
-         max-h-[90vh] -> Para que si es muy largo tenga scroll interno.
-      */}
+    
       <div className="bg-white rounded-2xl shadow-2xl w-[95%] sm:w-full max-w-md relative animate-in fade-in zoom-in duration-200 flex flex-col max-h-[90vh]">
         
         {/* Header del Modal */}

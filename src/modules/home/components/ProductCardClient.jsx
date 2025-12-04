@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import Button from '../../shared/components/Button';
-import useCart from '../../cart/hook/useCart'; // Importamos el hook conectado
+import useCart from '../../cart/hook/useCart'; 
 
 const ProductCardClient = ({ product, onRequireLogin }) => {
   const [quantity, setQuantity] = useState(0);
-  const { addItem } = useCart(); // Traemos la función del Provider
+  const { addItem } = useCart(); 
 
   const handleIncrement = () => setQuantity(prev => prev + 1);
   const handleDecrement = () => setQuantity(prev => (prev > 0 ? prev - 1 : 0));
@@ -18,16 +18,15 @@ const ProductCardClient = ({ product, onRequireLogin }) => {
 
     if (quantity < 1) return;
 
-    // Usamos addItem del Provider. 
-    // IMPORTANTE: Mapeamos los nombres aquí para que coincidan con lo que espera el carrito
+   
     addItem({
       productId: product.id || product.sku,
       name: product.name,
-      unitPrice: product.currentUnitPrice || product.price, // Aseguramos el precio
+      unitPrice: product.currentUnitPrice || product.price, 
       stock: product.stockQuantity
     }, quantity);
 
-    setQuantity(0); // Reseteamos contador
+    setQuantity(0); 
   };
 
   return (

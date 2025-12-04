@@ -65,19 +65,19 @@ const ClientLayout = () => {
         <ClientRegisterForm onSuccess={closeModal} onSwitchToLogin={() => setActiveModal('login')} />
       </Modal>
 
-      {/* --- NAVBAR FIXED --- */}
+     
       <header className="sticky top-0 bg-white z-30 shadow-sm border-b border-gray-200 h-20">
         <div className="h-full max-w-[1400px] mx-auto px-4 flex items-center justify-between">
             
-            {/* IZQUIERDA: Logo */}
+            
             <div className="flex items-center gap-2 cursor-pointer z-40 mr-8" onClick={() => handleNavigation('/')}>
                 <div className="font-bold text-2xl text-white leading-none" style={{ WebkitTextStroke: '1.5px gray' }}>JIM's</div>
                 <span className="font-bold text-2xl tracking-tight text-gray-900">Store</span>
             </div>
 
-            {/* CENTRO (Desktop): Nav Links (Izquierda) + SearchBar (Derecha) */}
+           
             <div className="hidden lg:flex flex-1 items-center justify-start gap-6">
-                 {/* 1. Navegación a la izquierda */}
+                 
                  <nav className="flex gap-2 flex-shrink-0">
                     <span className={getNavLinkClass('/')} onClick={() => handleNavigation('/')}>
                         Productos

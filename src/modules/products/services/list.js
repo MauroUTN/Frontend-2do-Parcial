@@ -1,6 +1,6 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const getProducts = async (name = '', status = 'todos', page = 1, pageSize, searchSku = false) => { // <--- Agregamos searchSku
+export const getProducts = async (name = '', status = 'todos', page = 1, pageSize, searchSku = false) => { 
   try {
     const params = new URLSearchParams();
 
@@ -10,7 +10,6 @@ export const getProducts = async (name = '', status = 'todos', page = 1, pageSiz
     if (name) params.append('name', name);
     if (status && status !== 'todos') params.append('status', status);
     
-    // Enviamos el flag al backend
     params.append('searchSku', searchSku); 
 
     const response = await instance.get(`/products/paged?${params.toString()}`);

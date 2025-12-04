@@ -18,13 +18,13 @@ function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  // 1. ESTADO PARA CONTROLAR BÚSQUEDA POR SKU
+ 
   const [searchSku, setSearchSku] = useState(false); 
 
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // 2. ENVIAMOS searchSku AL SERVICIO
+     
       const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize, searchSku);
 
       if (error) throw error;
@@ -41,10 +41,10 @@ function ProductProvider({ children }) {
 
   useEffect(() => {
     fetchProducts();
-    // 3. RECARGAR SI CAMBIA searchSku
+    
   }, [status, pageSize, pageNumber, searchSku]); 
 
-  // Reset de página al buscar o cambiar filtro
+  
   useEffect(() => {
     setPageNumber(1);
   }, [status, searchTerm]); 
@@ -68,15 +68,12 @@ function ProductProvider({ children }) {
         searchTerm,
         status,
         productStatus,
-        
         setPageNumber,
         setPageSize,
         setSearchTerm,
         setStatus,
         handleSearch,
         fetchProducts,
-
-        // 4. EXPORTAMOS EL CONTROL DE SKU
         searchSku,      
         setSearchSku   
       }}

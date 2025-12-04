@@ -30,7 +30,7 @@ function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
         <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg">
           <button 
             onClick={() => onUpdateQuantity(item.productId, item.quantity - 1)}
-            // AQUÍ EL CAMBIO: Pequeño en móvil, normal en PC
+            
             className="w-8 h-8 sm:w-auto sm:px-3 sm:py-1 text-gray-600 hover:bg-gray-200 rounded-l-lg font-bold transition-colors flex items-center justify-center"
           >
             -
@@ -42,7 +42,6 @@ function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
           
           <button 
             onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
-            // AQUÍ EL CAMBIO: Pequeño en móvil, normal en PC
             className="w-8 h-8 sm:w-auto sm:px-3 sm:py-1 text-gray-600 hover:bg-gray-200 rounded-r-lg font-bold transition-colors flex items-center justify-center"
           >
             +

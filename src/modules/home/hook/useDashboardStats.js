@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
-// Importamos tus servicios existentes basándonos en tu foto
 import { getProducts } from '../../products/services/list'; 
-// OJO: Si en orders usas 'listServices.js', cambia la importación aquí abajo:
 import { getOrders } from '../../orders/services/orderService'; 
 
 const useDashboardStats = () => {
@@ -16,15 +14,13 @@ const useDashboardStats = () => {
       try {
         setLoading(true);
 
-        // Hacemos las dos peticiones en paralelo.
-        // Pedimos pageSize: 1 porque solo nos interesa el dato 'total' del backend, no la lista entera.
         const [productsRes, ordersRes] = await Promise.all([
-          getProducts('', 'todos', 1, 1), // Search vacío, status all, pág 1, tamaño 1
+          getProducts('', 'todos', 1, 1), 
           getOrders('', 'all', 1, 1)
         ]);
 
         setStats({
-          // Accedemos a .data.total (o totalCount, según como responda tu backend)
+        
           productCount: productsRes.data?.total || 0,
           orderCount: ordersRes.data?.total || 0
         });

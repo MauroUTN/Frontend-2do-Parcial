@@ -11,15 +11,14 @@ function CatalogPage() {
     products, 
     loading, 
     setStatus, 
-    setSearchSku // Traemos esto para configurar el modo cliente
+    setSearchSku 
   } = useProducts(); 
 
   const [activeModal, setActiveModal] = useState(null);
 
   useEffect(() => {
-    // CONFIGURACIÓN INICIAL PARA CLIENTES:
-    setStatus('true');      // 1. Solo productos activos
-    setSearchSku(false);    // 2. NO buscar por SKU (solo nombre)
+    setStatus('true');      
+    setSearchSku(false);    
   }, []);
 
   const closeModal = () => setActiveModal(null);

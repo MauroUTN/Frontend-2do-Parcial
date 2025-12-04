@@ -7,7 +7,7 @@ export const useOrders = () => {
   const [loading, setLoading] = useState(false);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [appliedSearch, setAppliedSearch] = useState(''); // 🔥 Solo busca cuando se confirma (ENTER)
+  const [appliedSearch, setAppliedSearch] = useState(''); 
 
   const [status, setStatus] = useState('all');
   const [pageNumber, setPageNumber] = useState(1);
@@ -32,13 +32,12 @@ export const useOrders = () => {
     }
   };
 
-  // Se ejecuta cuando cambia algo que sí dispara una búsqueda
+ 
   useEffect(() => {
     console.log("Estoy buscando")
     fetchOrders();
   }, [appliedSearch, status, pageNumber, pageSize]);
 
-  // Se ejecuta solo cuando presiono ENTER
   const confirmSearch = () => {
     setAppliedSearch(searchTerm);
     setPageNumber(1);

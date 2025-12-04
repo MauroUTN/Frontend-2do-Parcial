@@ -11,16 +11,16 @@ function ProtectedRoute({ children, allowedRoles }) {
     </div>; 
   }
 
-  // 1. Si NO está logueado -> Login
+  
   if (!isAuthenticated) {
     return <Navigate to='/login' replace />;
   }
 
-  // 2. NUEVO: Si la ruta pide roles específicos (ej: ['Admin'])
+ 
   if (allowedRoles && allowedRoles.length > 0) {
     const userRole = getUserRoleFromToken();
     
-    // Si el rol del usuario NO está en la lista permitida -> Lo sacamos al inicio
+   
     if (!userRole || !allowedRoles.includes(userRole)) {
       return <Navigate to='/' replace />;
     }

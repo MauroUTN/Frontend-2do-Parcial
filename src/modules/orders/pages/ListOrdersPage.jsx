@@ -154,7 +154,7 @@ function ListOrdersPage() {
       value={pageSize}
       onChange={(e) => { 
         setPageSize(Number(e.target.value)); 
-        setPageNumber(1); // Resetear a página 1 al cambiar tamaño
+        setPageNumber(1); 
       }}
       className='cursor-pointer bg-white border border-gray-300 text-gray-600 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-purple-200 shadow-sm hover:border-gray-400 transition-colors'
     >

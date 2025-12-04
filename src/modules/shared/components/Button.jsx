@@ -9,9 +9,8 @@ function Button({ children, type = 'button', variant = 'default', ...restProps }
   const baseClasses = "py-2 px-6 rounded-lg font-medium text-gray-600 transition duration-200 ease-in-out flex items-center justify-center text-sm sm:text-base";
 
   const variantStyle = {
-    // Botón Morado Claro (texto gris)
+    
     default: 'bg-purple-200 hover:bg-purple-300',
-    // Botón Gris Claro (texto gris)
     secondary: 'bg-gray-200 hover:bg-gray-300',
   };
 

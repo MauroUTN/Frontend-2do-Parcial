@@ -10,7 +10,7 @@ export const getUserIdFromToken = () => {
     }).join(''));
 
     const decoded = JSON.parse(jsonPayload);
-    // 'sub' es donde Identity guarda el ID del usuario
+  
     return decoded.sub; 
   } catch (error) {
     console.error("Error decodificando token", error);
@@ -30,7 +30,7 @@ export const getUserRoleFromToken = () => {
 
     const decoded = JSON.parse(jsonPayload);
     
-    // .NET suele guardar el rol en esta propiedad larga:
+    
     return decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || decoded.role || null;
   } catch (error) {
     console.error("Error obteniendo rol", error);

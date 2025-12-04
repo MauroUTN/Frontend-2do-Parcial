@@ -17,7 +17,7 @@ import { CardProvider } from './modules/shared/context/CardProvider';
 
 function App() {
   const router = createBrowserRouter([
-    // --- ZONA PÚBLICA (CLIENTES) ---
+    
     {
       path: '/',
      element: <ClientLayout />, 
@@ -33,18 +33,17 @@ function App() {
       ],
     },
     
-    // --- LOGIN ---
+   
     {
       path: '/login',
       element: <LoginPage />,
     },
-    // --- SIGNUP ---
+    
     {
       path: '/register', 
       element: <SignUpPage />,
     },
 
-    // --- ZONA PRIVADA (ADMINISTRADOR) ---
  {
     path: '/admin',
       element: 

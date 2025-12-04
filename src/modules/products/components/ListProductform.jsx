@@ -1,12 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
-import useProducts from '../hook/useProducts'; // 1. Importamos el Hook
+import useProducts from '../hook/useProducts'; 
 
 function ListProductsPage() {
   const navigate = useNavigate();
 
-  // 2. Extraemos todo del Hook (ya no hay useState ni useEffect aquí)
+  
   const {
     products,
     loading,
@@ -20,7 +20,7 @@ function ListProductsPage() {
     setPageSize,
     totalPages,
     handleSearch,
-    productStatus // Constantes traídas del provider
+    productStatus 
   } = useProducts();
 
   return (
@@ -59,7 +59,7 @@ function ListProductsPage() {
             </Button>
           </div>
           <select
-            value={status} // Agregué el value para controlar el select
+            value={status} 
             onChange={(evt) => setStatus(evt.target.value)}
             className='text-[1.3rem]'
           >

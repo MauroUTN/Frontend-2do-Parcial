@@ -1,4 +1,4 @@
-// Cambiamos el nombre del primer parámetro a 'searchTerm'
+
 export const listOrders = async (searchTerm = "", status = "all", pageNumber = 1, pageSize = 20) => {
   try {
     const params = new URLSearchParams();
@@ -6,7 +6,7 @@ export const listOrders = async (searchTerm = "", status = "all", pageNumber = 1
     params.append("pageNumber", pageNumber);
     params.append("pageSize", pageSize);
 
-    // CAMBIO AQUÍ: Enviamos 'searchTerm' en lugar de 'orderID'
+    
     if (searchTerm) params.append("searchTerm", searchTerm);
     
     if (status !== "all") params.append("status", status);

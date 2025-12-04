@@ -3,8 +3,7 @@ import { createContext, useState, useEffect } from 'react';
 export const CardContext = createContext();
 
 export function CardProvider({ children }) {
-  // 1. SOLUCIÓN: Inicialización perezosa (Lazy State)
-  // Lee localStorage al inicio, evitando que se sobrescriba con [] al recargar
+  
   const [items, setItems] = useState(() => {
     try {
       const stored = localStorage.getItem('cart');
@@ -19,8 +18,7 @@ export function CardProvider({ children }) {
 
   const getId = (product) => product.id || product.Id || product.productId;
 
-  // 2. Efecto solo para GUARDAR y Calcular Total
-  // (Ya no necesitamos el efecto de lectura porque lo hicimos en el useState)
+  
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(items));
     
