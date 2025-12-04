@@ -11,7 +11,6 @@ import CatalogPage from './modules/home/pages/CatalogPage';
 import SignUpPage from './modules/auth/pages/SignUpPage';
 import CartPage from './modules/cart/pages/CartPage';
 
-// 1. IMPORTAR LOS PROVIDERS
 import ClientLayout from './modules/templates/components/ClientLayout';
 import { ProductProvider } from './modules/products/context/ProductProvider';
 import { CardProvider } from './modules/shared/context/CardProvider'; 
@@ -25,7 +24,7 @@ function App() {
       children: [
         {
           path: '/',
-          element: <CatalogPage />, // Se renderiza DENTRO del ClientLayout
+          element: <CatalogPage />,
         },
         {
           path: '/cart',
@@ -53,6 +52,11 @@ function App() {
               <Dashboard />
           </ProtectedRoute>,
       children: [
+        // --- 1. REDIRECCIÓN AUTOMÁTICA ---
+        {
+          index: true, // Esto matchea justo con "/admin"
+          element: <Navigate to="/admin/home" replace />, 
+        },
         {
           path: '/admin/home',
           element: <Home />,

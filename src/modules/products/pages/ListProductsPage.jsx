@@ -1,7 +1,9 @@
+import { useEffect } from 'react'; 
 import { useNavigate } from 'react-router-dom';
 import Button from '../../shared/components/Button';
 import Card from '../../shared/components/Card';
 import useProducts from '../hook/useProducts';
+import SearchBar from '../../shared/components/SearchBar';
 
 function ListProductsPage() {
   const navigate = useNavigate();
@@ -10,9 +12,17 @@ function ListProductsPage() {
     searchTerm, setSearchTerm,
     status, setStatus,
     pageNumber, pageSize, setPageSize,
-    handleSearch, handlePageChange, // Importamos las funciones nuevas
-    productStatus 
+    handleSearch, handlePageChange,
+    productStatus,
+    setSearchSku // <--- 1. Importamos la función para controlar el modo de búsqueda
   } = useProducts();
+
+  // 2. EFECTO: Al montar esta página (Admin), activamos la búsqueda por SKU.
+  // Al desmontarla (return), la desactivamos para volver al modo normal (Cliente).
+  useEffect(() => {
+    setSearchSku(true);
+    return () => setSearchSku(false);
+  }, []);
 
   return (
     <div>
@@ -26,30 +36,24 @@ function ListProductsPage() {
 
         <div className='flex flex-col sm:flex-row gap-4'>
           {/* BUSCADOR */}
-          <div className='flex items-center gap-3 w-full'>
-            <input
+          <div className='flex-1'>
+            <SearchBar
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              // Opcional: buscar al presionar Enter
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              type="text"
-              placeholder='Buscar por nombre...'
-              className='text-[1.3rem] w-full border p-2 rounded'
+              onChange={setSearchTerm}
+              onSearch={handleSearch}
+              placeholder='Buscar por nombre o SKU...' // Placeholder actualizado
+              className='w-full'
             />
-            <Button className='h-11 w-11' onClick={handleSearch}>
-               🔍
-            </Button>
           </div>
 
           {/* FILTRO DE ESTADO */}
-          {/* Al cambiar esto, el useEffect del hook dispara la búsqueda solo */}
           <select
             value={status}
             onChange={(e) => {
                 setStatus(e.target.value);
-                handlePageChange(1); // Volver a pag 1 al filtrar
+                handlePageChange(1);
             }}
-            className='text-[1.3rem] border p-2 rounded'
+            className='text-[1.3rem] border border-gray-300 p-2 rounded-lg h-full bg-white outline-none focus:ring-2 focus:ring-purple-200'
           >
             <option value={productStatus.ALL}>Todos</option>
             <option value={productStatus.ENABLED}>Habilitados</option>
@@ -58,21 +62,21 @@ function ListProductsPage() {
         </div>
       </Card>
 
-      {/* LISTADO */}
+      {/* LISTADO DE PRODUCTOS */}
       <div className='mt-4 flex flex-col gap-4'>
         {loading ? (
-          <p className="text-center">Cargando...</p>
+          <p className="text-center text-gray-500 py-10">Cargando...</p>
         ) : (
           (products || []).map((product) => (
             <Card key={product.id || product.sku}>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                   <div>
-                    <h2 className="font-bold">{product.name}</h2>
-                    <p className="text-sm text-gray-600">{product.sku}</p>
+                    <h2 className="font-bold text-lg">{product.name}</h2>
+                    <p className="text-sm text-gray-500 font-mono">SKU: {product.sku}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold">${product.currentUnitPrice}</p>
-                    <span className={`text-xs px-2 py-1 rounded ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <p className="font-bold text-lg">${product.currentUnitPrice}</p>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                         {product.isActive ? 'Habilitado' : 'Inhabilitado'}
                     </span>
                   </div>
@@ -83,21 +87,21 @@ function ListProductsPage() {
       </div>
 
       {/* PAGINACIÓN */}
-      <div className='flex justify-center items-center mt-4 gap-4'>
+      <div className='flex justify-center items-center mt-6 gap-4'>
         <button
           disabled={pageNumber === 1}
           onClick={() => handlePageChange(pageNumber - 1)}
-          className='bg-gray-200 px-3 py-1 rounded disabled:opacity-50'
+          className='bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition'
         >
           Anterior
         </button>
         
-        <span>Página {pageNumber} de {totalPages || 1}</span>
+        <span className="font-medium text-gray-700">Página {pageNumber} de {totalPages || 1}</span>
         
         <button
           disabled={pageNumber >= totalPages}
           onClick={() => handlePageChange(pageNumber + 1)}
-          className='bg-gray-200 px-3 py-1 rounded disabled:opacity-50'
+          className='bg-gray-200 px-4 py-2 rounded-lg disabled:opacity-50 hover:bg-gray-300 transition'
         >
           Siguiente
         </button>
@@ -108,7 +112,7 @@ function ListProductsPage() {
             setPageSize(Number(e.target.value));
             handlePageChange(1);
           }}
-          className='border p-1 rounded'
+          className='border border-gray-300 p-2 rounded-lg bg-white'
         >
           <option value="5">5</option>
           <option value="10">10</option>

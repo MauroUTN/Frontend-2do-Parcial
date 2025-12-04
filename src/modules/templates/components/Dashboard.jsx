@@ -70,9 +70,9 @@ function Dashboard() {
         <span> 
           <div className="flex-1 flex items-center gap-8 h-full">
             <div className="flex items-center gap-1 cursor-pointer" onClick={() => navigate('/')}>
-               {/* Nota: He mantenido tus estilos, asegura que el texto sea el deseado */}
-               <div className="w-13 h-13 flex items-center justify-center bg-black rounded-full text-white font-bold text-xl pb-1">Ni</div>
-               <span className="font-bold text-xl tracking-tight text-gray-900">Shop</span>
+               <div className="font-bold text-xl text-white leading-none"
+                style={{ WebkitTextStroke: '1.5px gray' }}>JIM's</div>
+               <span className="font-bold text-xl tracking-tight text-gray-900">Store</span>
             </div>
           </div>
         </span>

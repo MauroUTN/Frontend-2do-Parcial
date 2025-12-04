@@ -1,34 +1,24 @@
 import { instance } from '../../shared/api/axiosInstance';
 
-export const getProducts = async (name = '', status = 'todos', page = 1, pageSize) => {
+export const getProducts = async (name = '', status = 'todos', page = 1, pageSize, searchSku = false) => { // <--- Agregamos searchSku
   try {
     const params = new URLSearchParams();
 
-    console.log("getProducts - Parámetros:", { name, status, page, pageSize });
-    // 1. Parámetros que TU BACKEND SÍ PIDE (según el código que pasaste)
     params.append('pageNumber', page);
     params.append('pageSize', pageSize);
 
-    // 2. Filtros (Los enviamos igual, pero tu backend actual 'GetProductsPaged' los va a ignorar 
-    // a menos que modifiques C# para que reciba 'name' y 'status' también)
-    if (name) {
-        params.append('name', name); 
-    }
+    if (name) params.append('name', name);
+    if (status && status !== 'todos') params.append('status', status);
+    
+    // Enviamos el flag al backend
+    params.append('searchSku', searchSku); 
 
-    if (status && status !== 'todos') {
-        // Asumiendo que quieres mandar true/false. Si prefieres texto, quita la comparación.
-        params.append('status', status === 'true'); 
-    }
-
-    // 3. CAMBIO CRÍTICO: La ruta ahora es '/products/paged'
-    // Esto coincide con el [HttpGet("paged")] de tu Controller
     const response = await instance.get(`/products/paged?${params.toString()}`);
 
     return { 
       data: {
-        // Adaptamos la respuesta (C# suele devolver PascalCase: Items, TotalCount)
         productItems: response.data.items || response.data.Items || [], 
-        total: response.data.totalPages || response.data.totalPages || 0 
+        total: response.data.totalCount || response.data.totalCount || 0 
       }, 
       error: null 
     };

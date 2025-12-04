@@ -1,69 +1,64 @@
 import { createContext, useState, useEffect } from 'react';
-import { getProducts } from '../services/list'; // Asegúrate de que la ruta sea correcta
+import { getProducts } from '../services/list';
 
 const ProductContext = createContext();
 
-// Definimos los estados constantes aquí o en un archivo de constantes aparte
 const productStatus = {
-  ALL: 'all',
-  ENABLED: 'enabled',
-  DISABLED: 'disabled',
+  ALL: 'todos',
+  ENABLED: 'true',
+  DISABLED: 'false',
 };
 
 function ProductProvider({ children }) {
-  // 1. MOVER ESTADOS AQUÍ
   const [searchTerm, setSearchTerm] = useState('');
-  const [status, setStatus] = useState(productStatus.ALL);
+  const [status, setStatus] = useState(productStatus.ENABLED); 
   const [pageNumber, setPageNumber] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  
+  // 1. ESTADO PARA CONTROLAR BÚSQUEDA POR SKU
+  const [searchSku, setSearchSku] = useState(false); 
 
-  // 2. MOVER LA LÓGICA DE FETCH AQUÍ
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      // Nota: Pasamos los estados actuales a la función de servicio
-      const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize);
+      // 2. ENVIAMOS searchSku AL SERVICIO
+      const { data, error } = await getProducts(searchTerm, status, pageNumber, pageSize, searchSku);
 
       if (error) throw error;
 
-      setTotal(data.total);
-      setProducts(data.productItems);
+      setTotal(data?.total || 0);
+      setProducts(data?.productItems || []);
     } catch (error) {
       console.error(error);
+      setProducts([]); 
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. MOVER LOS EFECTOS AQUÍ
   useEffect(() => {
     fetchProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, pageSize, pageNumber]); 
-  // Nota: searchTerm no está en la dependencia para evitar busquedas mientras escribes, 
-  // se dispara con el botón buscar (handleSearch) o puedes usar debounce.
+    // 3. RECARGAR SI CAMBIA searchSku
+  }, [status, pageSize, pageNumber, searchSku]); 
 
+  // Reset de página al buscar o cambiar filtro
   useEffect(() => {
     setPageNumber(1);
-  }, [status]);
+  }, [status, searchTerm]); 
 
-  // Cálculo de total de páginas
   const totalPages = Math.ceil(total / pageSize);
 
-  // Función para buscar manualmente (cuando se hace click en la lupa)
   const handleSearch = async () => {
     setPageNumber(1);
     await fetchProducts();
   };
 
-  // 4. EXPORTAR TODO LO NECESARIO
   return (
     <ProductContext.Provider
       value={{
-        // Estados
         products,
         loading,
         pageNumber,
@@ -72,15 +67,18 @@ function ProductProvider({ children }) {
         totalPages,
         searchTerm,
         status,
-        productStatus, // Exportamos esto para usarlo en el select
+        productStatus,
         
-        // Funciones para modificar el estado
         setPageNumber,
         setPageSize,
         setSearchTerm,
         setStatus,
         handleSearch,
-        fetchProducts // Por si necesitamos recargar manualmente desde fuera
+        fetchProducts,
+
+        // 4. EXPORTAMOS EL CONTROL DE SKU
+        searchSku,      
+        setSearchSku   
       }}
     >
       {children}

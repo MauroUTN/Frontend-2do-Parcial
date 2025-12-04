@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Card from '../../shared/components/Card';
 import Button from '../../shared/components/Button';
+import SearchBar from '../../shared/components/SearchBar'; // 1. Importar
 import { useOrders } from '../hook/useOrders';
 
 const orderStatus = {
@@ -26,11 +27,7 @@ function ListOrdersPage() {
   const [expandedOrderId, setExpandedOrderId] = useState(null);
 
   const toggleDetails = (id) => {
-    if (expandedOrderId === id) {
-      setExpandedOrderId(null);
-    } else {
-      setExpandedOrderId(id);
-    }
+    setExpandedOrderId(prev => prev === id ? null : id);
   };
 
   const totalPages = total || 1;
@@ -46,27 +43,19 @@ function ListOrdersPage() {
         </div>
 
         <div className='flex flex-col sm:flex-row gap-4'>
-          <div className='flex items-center gap-3 w-full'>
-            <input 
+          <div className='flex-1'>
+            <SearchBar 
               value={searchTerm}
-              onChange={handleInputChange}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  confirmSearch();
-                }
-              }}
-              type="text" 
-              placeholder='Buscar por ID...' 
-              className='text-[1.3rem] w-full border p-1 rounded' 
+              onChange={(val) => handleInputChange({ target: { value: val } })}
+              onSearch={confirmSearch}
+              placeholder='Buscar por cliente...'  // <--- Cambio estético
+              className='w-full'
             />
-            <Button onClick={confirmSearch}>
-              Buscar
-            </Button>
           </div>
 
           <select 
             onChange={evt => setStatus(evt.target.value)} 
-            className='text-[1.3rem] border p-1 rounded bg-white'
+            className='text-[1.3rem] border border-gray-300 p-2 rounded-lg bg-white outline-none focus:ring-2 focus:ring-purple-200'
           >
             <option value={orderStatus.ALL}>Todos</option>
             <option value={orderStatus.PENDING}>Pendientes</option>
@@ -78,6 +67,7 @@ function ListOrdersPage() {
         </div>
       </Card>
 
+      {/* RESTO DEL COMPONENTE IGUAL (Listado y Paginación) */}
       <div className='mt-4 flex flex-col gap-4'>
         {loading ? (
           <p className="text-center text-gray-500">Cargando órdenes...</p>
@@ -88,36 +78,40 @@ function ListOrdersPage() {
             <Card key={order.id}>
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="font-bold text-xl">
-                    #{order.id} - {order.customerName || order.clientName || "Cliente"}
+                  <h2 className="font-bold text-xl text-gray-800">
+                    {order.customerName}
                   </h2>
+                  <p className="text-xs text-gray-400 mb-2">Orden #{order.id}</p>
                   
-                  <span className={`text-sm px-2 py-1 rounded-full font-medium ${
-                    order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                    order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                    order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                    'bg-blue-100 text-blue-800'
-                  }`}>
-                    {order.status}
-                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className={`text-sm px-2 py-1 rounded-full font-medium ${
+                        order.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                    }`}>
+                        {order.status}
+                    </span>
 
-                  <span className="ml-3 text-gray-500">
-                    Total: ${order.totalAmount || order.total || 0}
-                  </span>
+                    <span className="text-gray-700 font-semibold">
+                        Total: ${order.totalAmount?.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
+
                 <Button variant="secondary" onClick={() => toggleDetails(order.id)}>
-                    {expandedOrderId === order.id ? 'Ocultar' : 'Ver'}
+                    {expandedOrderId === order.id ? 'Ocultar' : 'Ver Detalles'}
                 </Button>
               </div>
 
               {expandedOrderId === order.id && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700">
-                        <p><strong>Customer ID:</strong> {order.customerId}</p>
+                <div className="mt-4 pt-4 border-t border-gray-200 bg-gray-50 p-4 rounded-lg">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-700 text-sm">
                         <p><strong>Fecha:</strong> {new Date(order.orderDate).toLocaleString()}</p>
-                        <p><strong>Dirección Envío:</strong> {order.shippingAddress}</p>
-                        <p><strong>Dirección Facturación:</strong> {order.billingAddress}</p>
-                        <p className="md:col-span-2"><strong>Notas:</strong> {order.notes}</p>
+                        <p><strong>Cliente ID:</strong> {order.customerId}</p>
+                        <p><strong>Envío:</strong> {order.shippingAddress}</p>
+                        <p><strong>Facturación:</strong> {order.billingAddress}</p>
+                        {order.notes && <p className="md:col-span-2"><strong>Notas:</strong> {order.notes}</p>}
                     </div>
                 </div>
               )}
@@ -134,9 +128,7 @@ function ListOrdersPage() {
         >
           Atrás
         </button>
-
         <span>Página {pageNumber} de {totalPages}</span>
-
         <button
           disabled={pageNumber >= totalPages}
           onClick={() => setPageNumber(pageNumber + 1)}
@@ -144,7 +136,6 @@ function ListOrdersPage() {
         >
           Siguiente
         </button>
-
         <select
           value={pageSize}
           onChange={(e) => setPageSize(Number(e.target.value))}

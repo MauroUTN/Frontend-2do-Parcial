@@ -3,7 +3,6 @@ export const getUserIdFromToken = () => {
   if (!token) return null;
 
   try {
-    // Decodificar la parte del payload del JWT (la segunda parte)
     const base64Url = token.split('.')[1];
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
@@ -11,7 +10,7 @@ export const getUserIdFromToken = () => {
     }).join(''));
 
     const decoded = JSON.parse(jsonPayload);
-    // 'sub' es el standard claim para el ID del usuario en Identity
+    // 'sub' es donde Identity guarda el ID del usuario
     return decoded.sub; 
   } catch (error) {
     console.error("Error decodificando token", error);

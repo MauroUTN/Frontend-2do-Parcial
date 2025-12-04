@@ -4,12 +4,12 @@ import useCart from '../hook/useCart';
 import ProductCartClient from '../components/ProductCartClient';
 import Button from '../../shared/components/Button';
 import Modal from '../../shared/components/Modal';
+import Input from '../../shared/components/Input';
 import ClientLoginForm from '../../home/components/ClientLoginForm';
 import ClientRegisterForm from '../../home/components/ClientRegisterForm';
 
-// --- NUEVAS IMPORTACIONES ---
 import { createOrder } from '../../orders/services/orderService';
-import { getUserIdFromToken } from '../../shared/helpers/jwtHelper'; // Asegúrate de haber creado este archivo
+import { getUserIdFromToken } from '../../shared/helpers/jwtHelper';
 
 function CartPage() {
   const navigate = useNavigate();
@@ -22,171 +22,234 @@ function CartPage() {
     clearCart,
   } = useCart();
 
-  const [activeModal, setActiveModal] = useState(null); // Para login/registro
+  const [activeModal, setActiveModal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showClearCartModal, setShowClearCartModal] = useState(false); // Modal vaciar carrito
+  const [showClearCartModal, setShowClearCartModal] = useState(false);
+
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false); 
+  
+  const [checkoutForm, setCheckoutForm] = useState({
+    shippingAddress: '',
+    billingAddress: '',
+    notes: ''
+  });
 
   const hasItems = items.length > 0;
 
-  // --- LÓGICA PRINCIPAL DE CREACIÓN DE ORDEN ---
+  const handleCheckoutChange = (e) => {
+    const { name, value } = e.target;
+    setCheckoutForm(prev => ({ ...prev, [name]: value }));
+  };
+
   const submitOrder = async () => {
+    if (!checkoutForm.shippingAddress.trim() || !checkoutForm.billingAddress.trim()) {
+        alert("Por favor completa las direcciones de envío y facturación.");
+        return;
+    }
+
     setIsProcessing(true);
     
-    // 1. Validar que tengamos usuario (extraer ID del token)
     const customerId = getUserIdFromToken();
-    
     if (!customerId) {
-        alert("Sesión expirada o inválida. Por favor, inicie sesión nuevamente.");
+        alert("Sesión inválida. Por favor inicia sesión nuevamente.");
         setIsProcessing(false);
         setActiveModal('login');
         return;
     }
 
     try {
-      // 2. Armar el objeto tal cual lo pide tu Backend (.NET RequestOrderModel)
       const orderData = {
         OrderDate: new Date().toISOString(),
-        ShippingAddress: "Calle Falsa 123, Tucumán", // Aquí podrías poner un input real
-        BillingAddress: "Calle Falsa 123, Tucumán",
-        Notes: "Compra realizada desde la web",
-        CustomerId: customerId, // El GUID del usuario extraído del token
-        Status: 1, // 1 = PENDING (según tu Enum OrderStatus)
+        ShippingAddress: checkoutForm.shippingAddress,
+        BillingAddress: checkoutForm.billingAddress,
+        Notes: checkoutForm.notes,
+        CustomerId: customerId,
+        Status: 1, 
         OrderItems: items.map(item => ({
-          ProductId: item.productId || item.id, // Aseguramos enviar el GUID del producto
+          ProductId: item.productId || item.id, 
           Quantity: item.quantity
         }))
       };
 
-      console.log("Enviando orden al backend:", orderData);
-
-      // 3. Llamar al servicio
       const { error } = await createOrder(orderData);
 
       if (error) {
-        // Si hay error (ej: Stock insuficiente), lo mostramos
         const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error;
-        alert(`No se pudo procesar la orden: ${errorMessage}`);
+        alert(`No se pudo crear la orden: ${errorMessage}`);
       } else {
-        // Éxito
-        alert("¡Compra realizada con éxito! Gracias por tu pedido.");
         clearCart();
-        navigate('/admin/orders'); // Redirigimos a mis órdenes (o al home)
+        setShowCheckoutModal(false);
+        setShowSuccessModal(true);
       }
 
     } catch (err) {
-      console.error("Error inesperado en submitOrder:", err);
+      console.error("Error crítico:", err);
       alert("Ocurrió un error inesperado al procesar la compra.");
     } finally {
       setIsProcessing(false);
     }
   };
 
-  // Botón "Finalizar Compra"
   const handleFinalizePurchase = () => {
     const token = localStorage.getItem('token');
     if (token) {
-      submitOrder(); // Si ya tiene token, intenta crear la orden
+      setShowCheckoutModal(true); 
     } else {
-      setActiveModal('login'); // Si no, pide login
+      setActiveModal('login'); 
     }
   };
 
-  // Callback cuando el login es exitoso
   const handleLoginSuccess = () => {
     setActiveModal(null);
-    // Esperamos un poco para asegurar que el token se guardó en localStorage
-    setTimeout(() => {
-        submitOrder();
-    }, 500);
+    setTimeout(() => setShowCheckoutModal(true), 500);
   };
 
-  // Confirmación de vaciar carrito
-  const handleConfirmClear = () => {
-    clearCart();
-    setShowClearCartModal(false);
+  const handleCloseSuccess = () => {
+    setShowSuccessModal(false);
+    navigate('/'); 
   };
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
       
-      {/* --- MODALES --- */}
+      {/* MODALES LOGIN/REGISTRO */}
       <Modal isOpen={activeModal === 'login'} onClose={() => setActiveModal(null)} title="Inicia sesión">
         <ClientLoginForm onSuccess={handleLoginSuccess} onSwitchToRegister={() => setActiveModal('register')} />
       </Modal>
-
       <Modal isOpen={activeModal === 'register'} onClose={() => setActiveModal(null)} title="Crear cuenta">
         <ClientRegisterForm onSuccess={() => setActiveModal(null)} onSwitchToLogin={() => setActiveModal('login')} />
       </Modal>
 
+      {/* MODAL VACIAR CARRITO */}
       <Modal isOpen={showClearCartModal} onClose={() => setShowClearCartModal(false)} title="¿Vaciar carrito?">
         <div className="flex flex-col gap-4">
-          <p className="text-gray-600">¿Estás seguro de eliminar todos los productos?</p>
-          <div className="flex gap-3 mt-2 justify-end">
+          <p className="text-gray-600">¿Estás seguro de vaciar el carrito?</p>
+          <div className="flex gap-3 justify-end">
             <Button variant="secondary" onClick={() => setShowClearCartModal(false)}>Cancelar</Button>
-            <Button variant="default" onClick={handleConfirmClear} className="bg-red-100 text-red-700 hover:bg-red-200">Sí, vaciar</Button>
+            <Button variant="default" onClick={() => { clearCart(); setShowClearCartModal(false); }} className="bg-red-100 text-red-700 hover:bg-red-200">Sí, vaciar</Button>
           </div>
         </div>
       </Modal>
 
-      {/* --- LISTA DE PRODUCTOS (IZQUIERDA) --- */}
+      {/* MODAL DE ÉXITO */}
+      <Modal isOpen={showSuccessModal} onClose={handleCloseSuccess} title="¡Compra Exitosa!">
+        <div className="flex flex-col items-center gap-6 text-center py-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-3xl">✓</div>
+            <div>
+              <p className="text-lg font-bold text-gray-800">Tu orden ha sido registrada.</p>
+              <p className="text-sm text-gray-500">Ya estamos preparando tu pedido.</p>
+            </div>
+            {/* Botón estandarizado */}
+            <Button 
+                variant="default" 
+                className="w-full"
+                onClick={handleCloseSuccess}
+            >
+                Volver a la tienda
+            </Button>
+        </div>
+      </Modal>
+
+      {/* MODAL CHECKOUT */}
+      <Modal 
+        isOpen={showCheckoutModal} 
+        onClose={() => !isProcessing && setShowCheckoutModal(false)} 
+        title="Datos de Envío"
+      >
+        <div className="flex flex-col gap-4 min-w-[300px]">
+            <Input 
+                label="Dirección de Envío"
+                name="shippingAddress"
+                placeholder="Ej: Av. Roca 123"
+                value={checkoutForm.shippingAddress}
+                onChange={handleCheckoutChange}
+            />
+            <Input 
+                label="Dirección de Facturación"
+                name="billingAddress"
+                placeholder="Ej: Misma que envío"
+                value={checkoutForm.billingAddress}
+                onChange={handleCheckoutChange}
+            />
+            <Input 
+                label="Notas (Opcional)"
+                name="notes"
+                placeholder="Ej: Dejar en portería"
+                value={checkoutForm.notes}
+                onChange={handleCheckoutChange}
+            />
+            
+            <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
+                <Button variant="secondary" onClick={() => setShowCheckoutModal(false)} disabled={isProcessing} className="w-full justify-center">
+                    Cancelar
+                </Button>
+                {/* Botón estandarizado */}
+                <Button 
+                    variant="default" 
+                    onClick={submitOrder} 
+                    disabled={isProcessing} 
+                    className="w-full justify-center"
+                >
+                    {isProcessing ? 'Procesando...' : 'Confirmar Pedido'}
+                </Button>
+            </div>
+        </div>
+      </Modal>
+
+      {/* LISTA DE PRODUCTOS */}
       <section className="flex-1 bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
         <div className="flex justify-between items-center mb-6">
            <h1 className="text-xl font-bold text-gray-800">Carrito de compras</h1>
            {hasItems && (
-             <button 
-               onClick={() => setShowClearCartModal(true)}
-               className="text-sm text-red-500 hover:text-red-700 hover:underline font-medium transition-colors"
-             >
+             <button onClick={() => setShowClearCartModal(true)} className="text-sm text-red-500 hover:underline cursor-pointer">
                Vaciar carrito
              </button>
            )}
         </div>
 
         {!hasItems && (
-          <div className="text-gray-400 py-10 text-center flex flex-col items-center gap-4">
-            <p>Tu carrito está vacío.</p>
-            <Button variant="secondary" className="w-auto px-6" onClick={() => navigate('/')}>
-              Volver al catálogo
+          // --- CENTRADO PERFECTO ---
+          <div className="text-gray-400 py-20 flex flex-col items-center justify-center gap-6">
+            <p className="text-lg">Tu carrito está vacío.</p>
+            <Button 
+                variant="secondary" 
+                onClick={() => navigate('/')}
+                className="w-auto px-8"
+            >
+                Volver al catálogo
             </Button>
           </div>
         )}
 
-        {hasItems && (
-          <div className="flex flex-col gap-6">
-            {items.map((item) => (
-              <ProductCartClient 
-                key={item.productId} 
-                item={item} 
-                onUpdateQuantity={updateQuantity}
-                onRemove={removeItem}
-              />
-            ))}
-          </div>
-        )}
+        {items.map((item) => (
+          <ProductCartClient 
+            key={item.productId} 
+            item={item} 
+            onUpdateQuantity={updateQuantity}
+            onRemove={removeItem}
+          />
+        ))}
       </section>
 
-      {/* --- RESUMEN DE PEDIDO (DERECHA) --- */}
+      {/* RESUMEN */}
       <aside className="w-full lg:w-80 bg-white rounded-2xl shadow-sm p-6 h-fit border border-gray-100 sticky top-24">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Detalle de pedido</h2>
-
+        <h2 className="text-lg font-bold text-gray-800 mb-4">Resumen</h2>
         <div className="flex justify-between mb-2 text-sm text-gray-600">
-          <span>Cantidad de productos</span>
+          <span>Productos</span>
           <span className="font-medium">{items.reduce((acc, x) => acc + x.quantity, 0)}</span>
         </div>
-
         <div className="border-t border-gray-200 pt-4 flex justify-between items-center mb-6">
-          <span className="text-base font-bold text-gray-800">Total a pagar</span>
+          <span className="text-base font-bold text-gray-800">Total</span>
           <span className="text-xl font-bold text-gray-900">${total.toFixed(2)}</span>
         </div>
-
-        {/* BOTÓN FINALIZAR COMPRA */}
         <Button
-          className="w-full rounded-lg py-3 font-bold bg-purple-200 text-purple-900 hover:bg-purple-300"
+          className="w-full"
           variant="default"
           disabled={!hasItems || isProcessing}
           onClick={handleFinalizePurchase}
         >
-          {isProcessing ? 'Procesando...' : 'Finalizar Compra'}
+          Finalizar Compra
         </Button>
       </aside>
     </div>
