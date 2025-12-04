@@ -45,16 +45,15 @@ function App() {
     },
 
     // --- ZONA PRIVADA (ADMINISTRADOR) ---
-    {
-      path: '/admin',
+ {
+    path: '/admin',
       element: 
-          <ProtectedRoute>
+          <ProtectedRoute allowedRoles={['Admin']}>
               <Dashboard />
           </ProtectedRoute>,
       children: [
-        // --- 1. REDIRECCIÓN AUTOMÁTICA ---
         {
-          index: true, // Esto matchea justo con "/admin"
+          index: true, 
           element: <Navigate to="/admin/home" replace />, 
         },
         {
