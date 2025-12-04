@@ -2,11 +2,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { registerUser } from '../../auth/services/register';
 import Button from '../../shared/components/Button';
-import Input from '../../shared/components/Input';
 
 const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
   const [errorBackend, setErrorBackend] = useState('');
-  const [successMessage, setSuccessMessage] = useState(''); // Nuevo estado para mensaje verde
+  const [successMessage, setSuccessMessage] = useState('');
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm();
   const password = watch("password");
@@ -15,13 +14,11 @@ const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
     setErrorBackend('');
     setSuccessMessage('');
 
-    // Payload con Mayúsculas para que C# lo entienda bien
    const payload = {
       Username: data.username,
       Email: data.email,
       Password: data.password,
       Rol: 'User',
-      // Ahora enviamos los datos reales del formulario
       Name: data.name,           
       PhoneNumber: data.phoneNumber 
     };
@@ -29,97 +26,83 @@ const ClientRegisterForm = ({ onSuccess, onSwitchToLogin }) => {
     const { error } = await registerUser(payload);
 
     if (error) {
-      // Si falla, mostramos error rojo
       setErrorBackend(typeof error === 'object' ? JSON.stringify(error) : error);
     } else {
-      // SI ES EXITOSO:
-      // 1. Mostramos mensaje verde
-      setSuccessMessage("¡Cuenta creada con éxito! Redirigiendo al login...");
-      
-      // 2. Esperamos 1.5 segundos y cambiamos al Login automáticamente
+      setSuccessMessage("¡Cuenta creada con éxito!");
       setTimeout(() => {
-        onSwitchToLogin();
+        onSuccess(); 
+        if(onSwitchToLogin) onSwitchToLogin();
       }, 1500);
     }
   };
 
+  // ESTILOS AJUSTADOS: Tamaño normal
+  const inputClass = "w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-200 transition-all text-gray-700 text-base";
+  const labelClass = "block text-gray-700 font-bold mb-1 text-sm";
+
    return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
 
-      <Input
-        label="Usuario"
-        error={errors.username?.message}
-        {...register("username", { required: "Requerido" })}
-      />
+      <div>
+        <label className={labelClass}>Usuario</label>
+        <input className={inputClass} placeholder="Ej: juanperez" {...register("username", { required: "Requerido" })} />
+        {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>}
+      </div>
 
-      <Input
-        label="Nombre Completo"
-        placeholder="Juan Pérez"
-        error={errors.name?.message}
-        {...register("name", { required: "El nombre es requerido" })}
-      />
+      <div>
+        <label className={labelClass}>Nombre Completo</label>
+        <input className={inputClass} placeholder="Nombre y Apellido" {...register("name", { required: "Requerido" })} />
+        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
+      </div>
 
-      <Input
-        label="Teléfono"
-        placeholder="+54 9 11 ..."
-        error={errors.phoneNumber?.message}
-        {...register("phoneNumber", { required: "El teléfono es requerido" })}
-      />
-      <Input
-        label="Email"
-        type="email"
-        error={errors.email?.message}
-        {...register("email", { required: "Requerido" })}
-      />
-      <Input
-        label="Contraseña"
-        type="password"
-        error={errors.password?.message}
-        {...register("password", { 
-           required: "Requerido", 
-           minLength: { value: 8, message: "Mínimo 8 caracteres" } 
-        })}
-      />
-      <Input
-        label="Confirmar contraseña"
-        type="password"
-        error={errors.confirmPassword?.message}
-        {...register("confirmPassword", { 
-           validate: v => v === password || "No coinciden" 
-        })}
-      />
+      <div>
+        <label className={labelClass}>Teléfono</label>
+        <input className={inputClass} placeholder="+54 9 11 ..." {...register("phoneNumber", { required: "Requerido" })} />
+        {errors.phoneNumber && <p className="text-red-500 text-xs mt-1">{errors.phoneNumber.message}</p>}
+      </div>
 
-      {/* MENSAJES DE ESTADO */}
-      
-      {/* Error Rojo */}
+      <div>
+        <label className={labelClass}>Email</label>
+        <input className={inputClass} type="email" placeholder="correo@ej.com" {...register("email", { required: "Requerido" })} />
+        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+      </div>
+
+      <div>
+        <label className={labelClass}>Contraseña</label>
+        <input className={inputClass} type="password" placeholder="******" {...register("password", { required: "Requerido", minLength: { value: 8, message: "Min 8 chars" } })} />
+        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+      </div>
+
+      <div>
+        <label className={labelClass}>Confirmar contraseña</label>
+        <input className={inputClass} type="password" placeholder="******" {...register("confirmPassword", { validate: v => v === password || "No coinciden" })} />
+        {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
+      </div>
+
       {errorBackend && (
-        <div className="p-2 bg-red-50 text-red-600 text-sm rounded text-center border border-red-200">
+        <div className="p-2 bg-red-50 text-red-600 text-sm rounded text-center border border-red-100">
           {errorBackend}
         </div>
       )}
-
-      {/* Éxito Verde */}
       {successMessage && (
-        <div className="p-2 bg-green-50 text-green-700 text-sm rounded text-center border border-green-200 font-medium">
+        <div className="p-2 bg-green-50 text-green-700 text-sm rounded text-center border border-green-100 font-bold">
           {successMessage}
         </div>
       )}
 
       <div className="mt-2 flex flex-col gap-3">
-        <Button type="submit" variant="default">
+        <Button type="submit" variant="default" className="w-full py-2 text-base font-bold">
           Registrar Usuario
         </Button>
         
-        <p className="text-center text-sm text-gray-500">
-          ¿Ya tienes cuenta?{' '}
-          <button 
-            type="button" 
-            onClick={onSwitchToLogin}
-            className="text-gray-500 font-bold hover:underline"
-          >
-            Inicia Sesión
-          </button>
-        </p>
+        {onSwitchToLogin && (
+            <p className="text-center text-sm text-gray-500">
+            ¿Ya tienes cuenta?{' '}
+            <button type="button" onClick={onSwitchToLogin} className="text-purple-600 font-bold hover:underline">
+                Inicia Sesión
+            </button>
+            </p>
+        )}
       </div>
     </form>
   );

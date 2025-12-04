@@ -2,7 +2,6 @@ import Button from '../../shared/components/Button';
 
 function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
   
-  // Usamos unitPrice según tu hook
   const subtotal = item.unitPrice * item.quantity;
 
   return (
@@ -20,38 +19,40 @@ function ProductCartClient({ item, onUpdateQuantity, onRemove }) {
         <div className="flex flex-col sm:flex-row gap-1 sm:gap-4 mt-1 text-sm text-gray-500">
           <span>Cantidad: <span className="font-medium text-gray-900">{item.quantity}</span></span>
           <span className="hidden sm:inline">|</span>
-          {/* Precio unitario */}
           <span>Sub Total: <span className="font-medium text-gray-900">${subtotal.toFixed(2)}</span></span>
         </div>
       </div>
 
-      {/* Controles (+ - Borrar) */}
+      {/* Controles */}
       <div className="flex items-center gap-3">
         
-        {/* Selector Cantidad */}
+        {/* Selector Cantidad Responsive */}
         <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg">
           <button 
-            // Usamos productId y restamos 1 (tu hook maneja si llega a 0 lo borra o no)
             onClick={() => onUpdateQuantity(item.productId, item.quantity - 1)}
-            className="px-3 py-1 text-gray-600 hover:bg-gray-200 rounded-l-lg font-bold transition-colors"
+            // AQUÍ EL CAMBIO: Pequeño en móvil, normal en PC
+            className="w-8 h-8 sm:w-auto sm:px-3 sm:py-1 text-gray-600 hover:bg-gray-200 rounded-l-lg font-bold transition-colors flex items-center justify-center"
           >
             -
           </button>
-          <span className="w-8 text-center font-medium text-gray-800">{item.quantity}</span>
+          
+          <span className="w-8 text-center font-medium text-gray-800 text-sm sm:text-base">
+            {item.quantity}
+          </span>
+          
           <button 
-            // Usamos productId y sumamos 1
             onClick={() => onUpdateQuantity(item.productId, item.quantity + 1)}
-            className="px-3 py-1 text-gray-600 hover:bg-gray-200 rounded-r-lg font-bold transition-colors"
+            // AQUÍ EL CAMBIO: Pequeño en móvil, normal en PC
+            className="w-8 h-8 sm:w-auto sm:px-3 sm:py-1 text-gray-600 hover:bg-gray-200 rounded-r-lg font-bold transition-colors flex items-center justify-center"
           >
             +
           </button>
         </div>
 
-        {/* Botón Borrar */}
         <Button 
           variant="secondary"
-          className="bg-purple-100 text-gray-600 hover:bg-purple-200 border-none text-sm px-4 py-1.5"
-          onClick={() => onRemove(item.productId)} // Usamos productId
+          className="bg-purple-50 text-purple-700 hover:bg-purple-100 border-none text-xs sm:text-sm px-3 py-1.5 h-8 sm:h-auto"
+          onClick={() => onRemove(item.productId)} 
         >
           Borrar
         </Button>

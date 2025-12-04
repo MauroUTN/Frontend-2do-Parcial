@@ -4,37 +4,22 @@ import useCart from '../hook/useCart';
 import ProductCartClient from '../components/ProductCartClient';
 import Button from '../../shared/components/Button';
 import Modal from '../../shared/components/Modal';
-import Input from '../../shared/components/Input';
 import ClientLoginForm from '../../home/components/ClientLoginForm';
 import ClientRegisterForm from '../../home/components/ClientRegisterForm';
-
 import { createOrder } from '../../orders/services/orderService';
 import { getUserIdFromToken } from '../../shared/helpers/jwtHelper';
 
 function CartPage() {
   const navigate = useNavigate();
-  
-  const {
-    items,
-    total,
-    updateQuantity,
-    removeItem,
-    clearCart,
-  } = useCart();
+  const { items, total, updateQuantity, removeItem, clearCart } = useCart();
 
   const [activeModal, setActiveModal] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showClearCartModal, setShowClearCartModal] = useState(false);
-
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false); 
   
-  const [checkoutForm, setCheckoutForm] = useState({
-    shippingAddress: '',
-    billingAddress: '',
-    notes: ''
-  });
-
+  const [checkoutForm, setCheckoutForm] = useState({ shippingAddress: '', billingAddress: '', notes: '' });
   const hasItems = items.length > 0;
 
   const handleCheckoutChange = (e) => {
@@ -44,20 +29,12 @@ function CartPage() {
 
   const submitOrder = async () => {
     if (!checkoutForm.shippingAddress.trim() || !checkoutForm.billingAddress.trim()) {
-        alert("Por favor completa las direcciones de envío y facturación.");
+        alert("Por favor completa las direcciones.");
         return;
     }
-
     setIsProcessing(true);
-    
     const customerId = getUserIdFromToken();
-    if (!customerId) {
-        alert("Sesión inválida. Por favor inicia sesión nuevamente.");
-        setIsProcessing(false);
-        setActiveModal('login');
-        return;
-    }
-
+    
     try {
       const orderData = {
         OrderDate: new Date().toISOString(),
@@ -66,188 +43,150 @@ function CartPage() {
         Notes: checkoutForm.notes,
         CustomerId: customerId,
         Status: 1, 
-        OrderItems: items.map(item => ({
-          ProductId: item.productId || item.id, 
-          Quantity: item.quantity
-        }))
+        OrderItems: items.map(item => ({ ProductId: item.productId, Quantity: item.quantity }))
       };
 
       const { error } = await createOrder(orderData);
-
-      if (error) {
-        const errorMessage = typeof error === 'object' ? JSON.stringify(error) : error;
-        alert(`No se pudo crear la orden: ${errorMessage}`);
-      } else {
+      if (error) alert(`Error: ${JSON.stringify(error)}`);
+      else {
         clearCart();
         setShowCheckoutModal(false);
         setShowSuccessModal(true);
       }
-
     } catch (err) {
-      console.error("Error crítico:", err);
-      alert("Ocurrió un error inesperado al procesar la compra.");
+      console.error(err);
     } finally {
       setIsProcessing(false);
     }
   };
 
   const handleFinalizePurchase = () => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setShowCheckoutModal(true); 
-    } else {
-      setActiveModal('login'); 
-    }
+    if (localStorage.getItem('token')) setShowCheckoutModal(true);
+    else setActiveModal('login'); 
   };
 
-  const handleLoginSuccess = () => {
-    setActiveModal(null);
-    setTimeout(() => setShowCheckoutModal(true), 500);
-  };
-
-  const handleCloseSuccess = () => {
-    setShowSuccessModal(false);
-    navigate('/'); 
-  };
+  // Estilos Inputs normales
+  const labelStyle = "block text-gray-700 font-bold text-sm mb-1";
+  const inputStyle = "w-full border border-gray-300 rounded-lg px-3 py-2 text-base text-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-200";
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-6 pb-20 lg:pb-0">
       
-      {/* MODALES LOGIN/REGISTRO */}
+      {/* --- MODALES --- */}
       <Modal isOpen={activeModal === 'login'} onClose={() => setActiveModal(null)} title="Inicia sesión">
-        <ClientLoginForm onSuccess={handleLoginSuccess} onSwitchToRegister={() => setActiveModal('register')} />
+        <ClientLoginForm onSuccess={() => { setActiveModal(null); setTimeout(() => setShowCheckoutModal(true), 500); }} onSwitchToRegister={() => setActiveModal('register')} />
       </Modal>
       <Modal isOpen={activeModal === 'register'} onClose={() => setActiveModal(null)} title="Crear cuenta">
         <ClientRegisterForm onSuccess={() => setActiveModal(null)} onSwitchToLogin={() => setActiveModal('login')} />
       </Modal>
 
-      {/* MODAL VACIAR CARRITO */}
-      <Modal isOpen={showClearCartModal} onClose={() => setShowClearCartModal(false)} title="¿Vaciar carrito?">
+      {/* Checkout Modal */}
+      <Modal isOpen={showCheckoutModal} onClose={() => !isProcessing && setShowCheckoutModal(false)} title="Dirección de Envío">
         <div className="flex flex-col gap-4">
-          <p className="text-gray-600">¿Estás seguro de vaciar el carrito?</p>
-          <div className="flex gap-3 justify-end">
-            <Button variant="secondary" onClick={() => setShowClearCartModal(false)}>Cancelar</Button>
-            <Button variant="default" onClick={() => { clearCart(); setShowClearCartModal(false); }} className="bg-red-100 text-red-700 hover:bg-red-200">Sí, vaciar</Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* MODAL DE ÉXITO */}
-      <Modal isOpen={showSuccessModal} onClose={handleCloseSuccess} title="¡Compra Exitosa!">
-        <div className="flex flex-col items-center gap-6 text-center py-4">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-3xl">✓</div>
             <div>
-              <p className="text-lg font-bold text-gray-800">Tu orden ha sido registrada.</p>
-              <p className="text-sm text-gray-500">Ya estamos preparando tu pedido.</p>
+                <label className={labelStyle}>Dirección de Envío</label>
+                <input className={inputStyle} name="shippingAddress" placeholder="Ej: Av. Roca 123" value={checkoutForm.shippingAddress} onChange={handleCheckoutChange} />
             </div>
-            {/* Botón estandarizado */}
-            <Button 
-                variant="default" 
-                className="w-full"
-                onClick={handleCloseSuccess}
-            >
-                Volver a la tienda
-            </Button>
-        </div>
-      </Modal>
-
-      {/* MODAL CHECKOUT */}
-      <Modal 
-        isOpen={showCheckoutModal} 
-        onClose={() => !isProcessing && setShowCheckoutModal(false)} 
-        title="Datos de Envío"
-      >
-        <div className="flex flex-col gap-4 min-w-[300px]">
-            <Input 
-                label="Dirección de Envío"
-                name="shippingAddress"
-                placeholder="Ej: Av. Roca 123"
-                value={checkoutForm.shippingAddress}
-                onChange={handleCheckoutChange}
-            />
-            <Input 
-                label="Dirección de Facturación"
-                name="billingAddress"
-                placeholder="Ej: Misma que envío"
-                value={checkoutForm.billingAddress}
-                onChange={handleCheckoutChange}
-            />
-            <Input 
-                label="Notas (Opcional)"
-                name="notes"
-                placeholder="Ej: Dejar en portería"
-                value={checkoutForm.notes}
-                onChange={handleCheckoutChange}
-            />
+            <div>
+                <label className={labelStyle}>Dirección de Facturación</label>
+                <input className={inputStyle} name="billingAddress" placeholder="Ej: Misma que envío" value={checkoutForm.billingAddress} onChange={handleCheckoutChange} />
+            </div>
+            <div>
+                <label className={labelStyle}>Notas (Opcional)</label>
+                <input className={inputStyle} name="notes" placeholder="Ej: Dejar en portería" value={checkoutForm.notes} onChange={handleCheckoutChange} />
+            </div>
             
-            <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
-                <Button variant="secondary" onClick={() => setShowCheckoutModal(false)} disabled={isProcessing} className="w-full justify-center">
+            <div className="flex gap-3 mt-4">
+                <Button 
+                    variant="secondary" 
+                    onClick={() => setShowCheckoutModal(false)} 
+                    disabled={isProcessing} 
+                    className="flex-1 py-2 text-base bg-gray-200 text-gray-700 hover:bg-gray-300"
+                >
                     Cancelar
                 </Button>
-                {/* Botón estandarizado */}
                 <Button 
                     variant="default" 
                     onClick={submitOrder} 
                     disabled={isProcessing} 
-                    className="w-full justify-center"
+                    className="flex-1 py-2 text-base bg-purple-200 text-purple-800 hover:bg-purple-300 font-bold"
                 >
-                    {isProcessing ? 'Procesando...' : 'Confirmar Pedido'}
+                    {isProcessing ? '...' : 'Confirmar'}
                 </Button>
             </div>
         </div>
       </Modal>
 
-      {/* LISTA DE PRODUCTOS */}
-      <section className="flex-1 bg-white rounded-2xl shadow-sm p-5 border border-gray-100">
-        <div className="flex justify-between items-center mb-6">
-           <h1 className="text-xl font-bold text-gray-800">Carrito de compras</h1>
+      {/* Success Modal */}
+      <Modal isOpen={showSuccessModal} onClose={() => { setShowSuccessModal(false); navigate('/'); }} title="¡Compra Exitosa!">
+        <div className="flex flex-col items-center gap-6 py-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 text-3xl">✓</div>
+            <p className="text-lg font-medium text-center text-gray-700">Tu orden ha sido registrada correctamente.</p>
+            <Button variant="default" className="w-full py-2" onClick={() => { setShowSuccessModal(false); navigate('/'); }}>Volver a la tienda</Button>
+        </div>
+      </Modal>
+
+      {/* Clear Cart Modal */}
+      <Modal isOpen={showClearCartModal} onClose={() => setShowClearCartModal(false)} title="¿Vaciar carrito?">
+         <div className="flex gap-3 justify-end mt-4">
+            <Button variant="secondary" onClick={() => setShowClearCartModal(false)}>No</Button>
+            <Button variant="default" onClick={() => { clearCart(); setShowClearCartModal(false); }} className="bg-red-100 text-red-700">Sí, vaciar</Button>
+         </div>
+      </Modal>
+
+      {/* --- SECCIÓN PRINCIPAL (LISTA) --- */}
+      <section className="flex-1 bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        
+        {/* Header Carrito (Sin botón volver) */}
+        <div className="flex flex-row justify-between items-center mb-4 gap-2">
+           <h1 className="text-xl font-bold text-gray-800">Carrito</h1>
+           
            {hasItems && (
-             <button onClick={() => setShowClearCartModal(true)} className="text-sm text-red-500 hover:underline cursor-pointer">
-               Vaciar carrito
+             <button 
+                onClick={() => setShowClearCartModal(true)} 
+                className="text-red-500 text-sm font-medium hover:underline"
+             >
+                Vaciar carrito
              </button>
            )}
         </div>
 
-        {!hasItems && (
-          // --- CENTRADO PERFECTO ---
-          <div className="text-gray-400 py-20 flex flex-col items-center justify-center gap-6">
-            <p className="text-lg">Tu carrito está vacío.</p>
+        {!hasItems ? (
+          <div className="flex flex-col items-center justify-center py-16 text-gray-400">
+            <p className="mb-4 text-lg">Tu carrito está vacío.</p>
             <Button 
                 variant="secondary" 
                 onClick={() => navigate('/')}
                 className="w-auto px-8"
             >
-                Volver al catálogo
+                Ir al catálogo
             </Button>
           </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {items.map((item) => (
+              <ProductCartClient key={item.productId} item={item} onUpdateQuantity={updateQuantity} onRemove={removeItem} />
+            ))}
+          </div>
         )}
-
-        {items.map((item) => (
-          <ProductCartClient 
-            key={item.productId} 
-            item={item} 
-            onUpdateQuantity={updateQuantity}
-            onRemove={removeItem}
-          />
-        ))}
       </section>
 
-      {/* RESUMEN */}
-      <aside className="w-full lg:w-80 bg-white rounded-2xl shadow-sm p-6 h-fit border border-gray-100 sticky top-24">
+      {/* --- RESUMEN (SIDEBAR) --- */}
+      <aside className="w-full lg:w-80 bg-white rounded-xl shadow-sm p-5 h-fit border border-gray-100 lg:sticky lg:top-24">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Resumen</h2>
-        <div className="flex justify-between mb-2 text-sm text-gray-600">
-          <span>Productos</span>
-          <span className="font-medium">{items.reduce((acc, x) => acc + x.quantity, 0)}</span>
+        <div className="flex justify-between mb-2 text-gray-600 text-sm">
+          <span>Productos ({items.reduce((a,b)=>a+b.quantity,0)})</span>
+          <span>${total.toFixed(2)}</span>
         </div>
-        <div className="border-t border-gray-200 pt-4 flex justify-between items-center mb-6">
-          <span className="text-base font-bold text-gray-800">Total</span>
-          <span className="text-xl font-bold text-gray-900">${total.toFixed(2)}</span>
+        <div className="border-t border-gray-200 pt-3 flex justify-between items-center mb-6">
+          <span className="text-lg font-bold text-gray-900">Total</span>
+          <span className="text-xl font-bold text-purple-700">${total.toFixed(2)}</span>
         </div>
-        <Button
-          className="w-full"
-          variant="default"
-          disabled={!hasItems || isProcessing}
-          onClick={handleFinalizePurchase}
+        <Button 
+            className="w-full py-3 text-base font-bold shadow-md shadow-purple-100" 
+            variant="default" 
+            disabled={!hasItems || isProcessing} 
+            onClick={handleFinalizePurchase}
         >
           Finalizar Compra
         </Button>
